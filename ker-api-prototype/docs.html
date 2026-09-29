@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ker API 文档中心</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root {
+    --bg:#fff; --border:#e6e8eb; --text:#1f2329; --muted:#646a73; --faint:#8f959e;
+    --primary:#16181d; --primary-weak:#f2f3f5; --code-bg:#f7f8fa;
+  }
+  body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+         color:var(--text); font-size:14px; }
+  a { color:inherit; text-decoration:none; }
+
+  /* ============ 顶部导航 ============ */
+  .navbar { height:56px; display:flex; align-items:center; gap:24px; padding:0 24px;
+            border-bottom:1px solid var(--border); background:rgba(255,255,255,.92);
+            position:sticky; top:0; z-index:30; backdrop-filter:blur(6px); }
+  .brand { display:flex; align-items:center; gap:9px; font-weight:700; font-size:15px; }
+  .brand-logo { width:26px; height:26px; border-radius:7px; background:linear-gradient(135deg,#2a2d35,#101218);
+                color:#fff; font-weight:800; font-size:13px; display:flex; align-items:center; justify-content:center; }
+  .navbar .doc-badge { font-size:12px; color:var(--primary); background:var(--primary-weak);
+                       padding:2px 8px; border-radius:4px; font-weight:600; }
+  .nav-search { flex:0 0 280px; height:32px; border:1px solid var(--border); border-radius:8px;
+                background:var(--code-bg); font-size:13px; padding:0 12px; color:var(--faint);
+                display:flex; align-items:center; justify-content:space-between; cursor:pointer; }
+  .nav-search kbd { font-size:11px; border:1px solid var(--border); background:#fff; border-radius:4px;
+                    padding:1px 6px; color:var(--faint); }
+  .nav-links { margin-left:auto; display:flex; align-items:center; gap:22px; font-size:13.5px; color:var(--muted); }
+  .nav-links a:hover { color:var(--text); }
+  .nav-links .cta { color:#fff; background:var(--primary); padding:7px 14px; border-radius:8px; }
+
+  /* ============ 三栏布局 ============ */
+  .layout { display:flex; max-width:1440px; margin:0 auto; }
+  .sidebar { width:264px; flex-shrink:0; border-right:1px solid var(--border); background:var(--bg);
+             position:sticky; top:56px; height:calc(100vh - 56px); overflow-y:auto; padding:24px 10px 40px; }
+  .side-group { margin-bottom:22px; }
+  .side-group > .g-title { font-size:12px; font-weight:700; color:var(--faint);
+                           padding:0 12px; margin-bottom:6px; letter-spacing:.02em; }
+  .side-item { display:block; padding:6px 12px; border-radius:7px; font-size:13.5px; color:var(--muted);
+               cursor:pointer; margin-bottom:1px; }
+  .side-item:hover { background:#f2f3f5; color:var(--text); }
+  .side-item.active { background:var(--primary-weak); color:var(--primary); font-weight:600; }
+  .side-item .new { font-size:10px; color:var(--orange); margin-left:6px; font-weight:600; }
+  .side-item.api::after { content:"API"; font-size:9.5px; color:var(--faint); border:1px solid var(--border);
+                          border-radius:4px; padding:0 4px; margin-left:6px; vertical-align:1px; }
+
+  .article { flex:1; min-width:0; padding:36px 48px 80px; }
+  .crumb { font-size:12.5px; color:var(--faint); margin-bottom:14px; }
+  .crumb b { color:var(--muted); font-weight:500; }
+  .article h1 { font-size:28px; font-weight:700; margin-bottom:10px; }
+  .lead { color:var(--muted); font-size:14.5px; line-height:1.75; margin-bottom:26px; }
+  .article h2 { font-size:19px; font-weight:700; margin:34px 0 12px; padding-top:10px; }
+  .article p { line-height:1.8; color:#3c4149; font-size:14px; margin-bottom:10px; }
+  .article code.inline { background:var(--code-bg); border:1px solid var(--border); border-radius:5px;
+                         padding:1px 6px; font-family:"SF Mono",ui-monospace,Menlo,monospace; font-size:12.5px; }
+  .article ul { padding-left:22px; line-height:1.9; color:#3c4149; font-size:14px; }
+
+  .callout { display:flex; gap:10px; border-radius:10px; padding:13px 16px; font-size:13px;
+             line-height:1.7; margin:14px 0; }
+  .callout.info { background:var(--primary-weak); border:1px solid #e6e8eb; color:#1f2329; }
+  .callout.warn { background:#fffbe6; border:1px solid #ffe58f; color:#8c6b1f; }
+  .callout .ico { font-weight:800; flex-shrink:0; }
+
+  .steps { counter-reset:step; margin:6px 0; }
+  .step { display:flex; gap:14px; padding:12px 0; }
+  .step::before { counter-increment:step; content:counter(step); width:24px; height:24px; flex-shrink:0;
+                  background:var(--primary-weak); color:var(--primary); border-radius:50%;
+                  display:flex; align-items:center; justify-content:center; font-size:12.5px; font-weight:700; margin-top:2px; }
+  .step .t { font-weight:600; margin-bottom:4px; }
+  .step .d { color:var(--muted); font-size:13.5px; line-height:1.7; }
+
+  .tabs { display:flex; gap:2px; border-bottom:1px solid var(--border); margin:16px 0 0; }
+  .tab { padding:8px 18px; font-size:13px; cursor:pointer; color:var(--muted);
+         border-bottom:2px solid transparent; margin-bottom:-1px; }
+  .tab.active { color:var(--primary); border-color:var(--primary); font-weight:600; }
+  .code-wrap { position:relative; }
+  .copy-btn { position:absolute; top:10px; right:10px; background:rgba(255,255,255,.12); color:#c9d1d9;
+              border:none; border-radius:6px; padding:5px 12px; font-size:12px; cursor:pointer; }
+  .copy-btn:hover { background:rgba(255,255,255,.22); }
+  pre.code { background:#0d1117; color:#c9d1d9; border-radius:0 0 10px 10px; padding:16px 18px;
+             font-family:"SF Mono",ui-monospace,Menlo,monospace; font-size:12.5px; line-height:1.75; overflow:auto; }
+  pre.code .cm { color:#8b949e; } pre.code .str { color:#a5d6ff; } pre.code .kw { color:#ff7b72; }
+
+  .toc { width:220px; flex-shrink:0; position:sticky; top:92px; height:fit-content;
+         padding:36px 8px 0 0; font-size:12.5px; }
+  .toc .t-title { color:var(--faint); font-weight:700; margin-bottom:8px; padding-left:12px; font-size:11.5px; }
+  .toc a { display:block; color:var(--muted); padding:4px 12px; border-left:2px solid transparent; line-height:1.5; }
+  .toc a:hover { color:var(--text); }
+  .toc a.on { color:var(--primary); border-left-color:var(--primary); font-weight:600; }
+</style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="brand"><div class="brand-logo">K</div>Ker API<span class="doc-badge">文档</span></div>
+  <div class="nav-search"><span>搜索文档…</span><kbd>Ctrl K</kbd></div>
+  <div class="nav-links">
+    <a href="#">模型广场</a><a href="#">价格</a><a href="#">控制台</a><a class="cta" href="#">获取 API Key</a>
+  </div>
+</nav>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="side-group">
+      <div class="g-title">快速开始</div>
+      <a class="side-item">平台简介</a>
+      <a class="side-item">注册与实名认证</a>
+      <a class="side-item">获取 API Key</a>
+      <a class="side-item active">发起第一个请求</a>
+      <a class="side-item">在线体验 Playground</a>
+    </div>
+    <div class="side-group">
+      <div class="g-title">功能指南</div>
+      <a class="side-item">文本生成</a>
+      <a class="side-item">流式输出</a>
+      <a class="side-item">推理模型</a>
+      <a class="side-item">Function Calling</a>
+      <a class="side-item">JSON 模式</a>
+      <a class="side-item">多模态输入</a>
+      <a class="side-item">上下文缓存<span class="new">NEW</span></a>
+      <a class="side-item">前缀续写</a>
+      <a class="side-item">图片生成</a>
+      <a class="side-item">视频生成</a>
+      <a class="side-item">语音合成</a>
+      <a class="side-item">批量推理<span class="new">NEW</span></a>
+    </div>
+    <div class="side-group">
+      <div class="g-title">API 参考</div>
+      <a class="side-item">认证方式</a>
+      <a class="side-item api">Chat Completions</a>
+      <a class="side-item api">Responses</a>
+      <a class="side-item api">Embeddings</a>
+      <a class="side-item api">Rerank</a>
+      <a class="side-item api">Images</a>
+      <a class="side-item api">Audio</a>
+      <a class="side-item api">Video</a>
+      <a class="side-item api">Files / Batches</a>
+      <a class="side-item api">模型列表</a>
+      <a class="side-item">速率限制与用户等级</a>
+      <a class="side-item">错误码</a>
+    </div>
+    <div class="side-group">
+      <div class="g-title">接入教程</div>
+      <a class="side-item">Cherry Studio</a>
+      <a class="side-item">Claude Code</a>
+      <a class="side-item">Cursor</a>
+      <a class="side-item">Open WebUI</a>
+      <a class="side-item">LangChain</a>
+    </div>
+    <div class="side-group">
+      <div class="g-title">资源</div>
+      <a class="side-item">计费规则与折扣</a>
+      <a class="side-item">常见问题 FAQ</a>
+      <a class="side-item">更新公告</a>
+    </div>
+  </aside>
+  <main class="article">
+    <div class="crumb">快速开始 / <b>发起第一个请求</b></div>
+    <h1>发起第一个请求</h1>
+    <p class="lead">本指南将带你完成从注册到成功调用模型 API 的全过程。Ker API 兼容 OpenAI 接口规范，使用官方 SDK 将 <code class="inline">base_url</code> 替换为 Ker API 地址即可，通常只需 3 行代码改动。</p>
+
+    <h2 id="s1">前置条件</h2>
+    <ul>
+      <li>已完成注册并登录 Ker API 控制台（支持手机号 / 邮箱）</li>
+      <li>完成个人或企业实名认证（未认证账户可用模型与速率受限）</li>
+      <li>账户有可用余额或处于试用期内</li>
+    </ul>
+
+    <h2 id="s2">第 1 步：获取 API Key</h2>
+    <div class="steps">
+      <div class="step"><div><div class="t">进入「API Key 管理」页面</div><div class="d">登录控制台后，在左侧导航选择「API Key 管理」，点击「新建 API Key」。</div></div></div>
+      <div class="step"><div><div class="t">设置名称与规则（可选）</div><div class="d">可为 Key 命名、设置可调用模型范围、额度上限与有效期。</div></div></div>
+      <div class="step"><div><div class="t">复制并保存 Key</div><div class="d">Key 仅在创建时完整展示一次，请立即保存到安全位置。</div></div></div>
+    </div>
+    <div class="callout warn"><span class="ico">!</span><span>API Key 等同于账户凭证，请勿提交到代码仓库或公开渠道。建议为不同业务创建独立 Key，便于隔离与按 Key 统计用量。</span></div>
+
+    <h2 id="s3">第 2 步：发起请求</h2>
+    <p>将 <code class="inline">base_url</code> 设置为 <code class="inline">https://api.kerapi.cn/v1</code>，模型名使用模型广场中的完整 ID（如 <code class="inline">deepseek-ai/DeepSeek-V3.2</code>）。</p>
+    <div class="tabs">
+      <span class="tab active" onclick="switchTab(this,'tCurl')">cURL</span>
+      <span class="tab" onclick="switchTab(this,'tPy')">Python</span>
+      <span class="tab" onclick="switchTab(this,'tNode')">Node.js</span>
+    </div>
+    <div class="code-wrap" id="tCurl">
+      <button class="copy-btn" onclick="copyCode(this)">复制</button>
+      <pre class="code">curl https://api.kerapi.cn/v1/chat/completions \
+  -H <span class="str">"Authorization: Bearer $KER_API_KEY"</span> \
+  -H <span class="str">"Content-Type: application/json"</span> \
+  -d '{
+    <span class="str">"model"</span>: <span class="str">"deepseek-ai/DeepSeek-V3.2"</span>,
+    <span class="str">"messages"</span>: [
+      { <span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: <span class="str">"你好，请介绍一下你自己。"</span> }
+    ]
+  }'</pre>
+    </div>
+    <div class="code-wrap" id="tPy" style="display:none">
+      <button class="copy-btn" onclick="copyCode(this)">复制</button>
+      <pre class="code"><span class="cm"># pip install openai</span>
+from openai import OpenAI
+
+client = OpenAI(
+    api_key=<span class="str">"你的 API Key"</span>,
+    base_url=<span class="str">"https://api.kerapi.cn/v1"</span>
+)
+
+response = client.chat.completions.create(
+    model=<span class="str">"deepseek-ai/DeepSeek-V3.2"</span>,
+    messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: <span class="str">"你好，请介绍一下你自己。"</span>}]
+)
+
+print(response.choices[0].message.content)</pre>
+    </div>
+    <div class="code-wrap" id="tNode" style="display:none">
+      <button class="copy-btn" onclick="copyCode(this)">复制</button>
+      <pre class="code"><span class="cm">// npm install openai</span>
+import OpenAI from <span class="str">"openai"</span>;
+
+const client = new OpenAI({
+  apiKey: process.env.KER_API_KEY,
+  baseURL: <span class="str">"https://api.kerapi.cn/v1"</span>
+});
+
+const res = await client.chat.completions.create({
+  model: <span class="str">"deepseek-ai/DeepSeek-V3.2"</span>,
+  messages: [{ role: <span class="str">"user"</span>, content: <span class="str">"你好，请介绍一下你自己。"</span> }]
+});
+
+console.log(res.choices[0].message.content);</pre>
+    </div>
+
+    <h2 id="s4">第 3 步：解析响应</h2>
+    <p>返回结构兼容 OpenAI 格式，正文位于 <code class="inline">choices[0].message.content</code>，用量信息位于 <code class="inline">usage</code> 字段，可用于对账：</p>
+    <div class="code-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">复制</button>
+      <pre class="code">{
+  <span class="str">"id"</span>: <span class="str">"chatcmpl-9f3ab2"</span>,
+  <span class="str">"model"</span>: <span class="str">"deepseek-ai/DeepSeek-V3.2"</span>,
+  <span class="str">"choices"</span>: [{
+    <span class="str">"message"</span>: { <span class="str">"role"</span>: <span class="str">"assistant"</span>, <span class="str">"content"</span>: <span class="str">"你好！我是 DeepSeek…"</span> },
+    <span class="str">"finish_reason"</span>: <span class="str">"stop"</span>
+  }],
+  <span class="str">"usage"</span>: { <span class="str">"prompt_tokens"</span>: 12, <span class="str">"completion_tokens"</span>: 208 }
+}</pre>
+    </div>
+    <div class="callout info"><span class="ico">i</span><span>请求失败时，错误信息集中在 <code class="inline">error.code</code> 与 <code class="inline">error.message</code>，完整错误码列表见「API 参考 → 错误码」。触发限流时请参考「速率限制与用户等级」升级说明。</span></div>
+
+  </main>
+
+  <aside class="toc">
+    <div class="t-title">本页目录</div>
+    <a class="on" href="#s1">前置条件</a>
+    <a href="#s2">第 1 步：获取 API Key</a>
+    <a href="#s3">第 2 步：发起请求</a>
+    <a href="#s4">第 3 步：解析响应</a>
+  </aside>
+</div>
+<script>
+  function switchTab(tab, id) {
+    const tabs = tab.parentElement.querySelectorAll('.tab');
+    tabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    ['tCurl','tPy','tNode'].forEach(x =>
+      document.getElementById(x).style.display = x === id ? 'block' : 'none');
+  }
+  function copyCode(btn) {
+    const code = btn.parentElement.querySelector('pre').innerText;
+    navigator.clipboard.writeText(code).then(() => {
+      const old = btn.textContent; btn.textContent = '已复制';
+      setTimeout(() => btn.textContent = old, 1200);
+    });
+  }
+  document.querySelectorAll('.toc a').forEach(a => {
+    a.addEventListener('click', () => {
+      document.querySelectorAll('.toc a').forEach(x => x.classList.remove('on'));
+      a.classList.add('on');
+    });
+  });
+</script>
+</body>
+</html>

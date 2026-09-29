@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ker API · 模型广场</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root {
+    --bg:#f5f6f8; --card:#fff; --border:#e6e8eb; --text:#1f2329; --muted:#646a73;
+    --faint:#8f959e; --primary:#3370ff; --primary-weak:#eaf1ff;
+    --green:#12b76a; --green-weak:#e8f7ee; --orange:#f79009;
+  }
+  body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+         background:var(--bg); color:var(--text); font-size:14px; }
+  .app { display:flex; min-height:100vh; }
+
+  /* ============ 左侧导航 ============ */
+  .sidebar { width:228px; flex-shrink:0; background:#fff; border-right:1px solid var(--border);
+             position:sticky; top:0; height:100vh; overflow-y:auto; padding:20px 12px; }
+  .brand { display:flex; align-items:center; gap:10px; padding:0 12px 18px; }
+  .brand-logo { width:32px; height:32px; border-radius:8px; background:linear-gradient(135deg,#3370ff,#7c5cff);
+                color:#fff; font-weight:800; display:flex; align-items:center; justify-content:center; font-size:15px; }
+  .brand-name { font-weight:700; font-size:16px; }
+  .nav-group { margin:16px 0 4px; padding:0 12px; font-size:12px; color:var(--faint); }
+  .nav-item { display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:8px;
+              color:var(--muted); font-size:13.5px; cursor:pointer; margin-bottom:2px; }
+  .nav-item svg { width:15px; height:15px; flex-shrink:0; }
+  .nav-item:hover { background:#f2f3f5; }
+  .nav-item.active { background:var(--primary-weak); color:var(--primary); font-weight:600; }
+  .sidebar-foot { margin-top:20px; padding:12px; border-top:1px solid var(--border);
+                  display:flex; align-items:center; gap:10px; }
+  .avatar { width:30px; height:30px; border-radius:50%; background:#dde3ec; color:#5b6472;
+            display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; }
+
+  /* ============ 主区域 ============ */
+  .main { flex:1; min-width:0; display:flex; flex-direction:column; }
+  .topbar { height:56px; display:flex; align-items:center; justify-content:space-between;
+            padding:0 28px; background:#fff; border-bottom:1px solid var(--border);
+            position:sticky; top:0; z-index:20; }
+  .crumb { color:var(--muted); font-size:13px; }
+  .crumb b { color:var(--text); font-weight:600; }
+  .topbar-right { display:flex; align-items:center; gap:16px; }
+  .balance { font-size:13px; color:var(--muted); }
+  .balance b { color:var(--text); }
+  .btn { border:1px solid var(--border); background:#fff; border-radius:8px; padding:7px 16px;
+         font-size:13px; cursor:pointer; color:var(--text); }
+  .btn-primary { background:var(--primary); border-color:var(--primary); color:#fff; }
+  .btn-primary:hover { opacity:.9; }
+
+  .page { padding:24px 28px 60px; max-width:1320px; width:100%; margin:0 auto; }
+  .page-head { display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:18px; }
+  .page-head h1 { font-size:22px; font-weight:700; }
+  .page-head .sub { color:var(--muted); font-size:13px; margin-top:6px; }
+  .count { color:var(--faint); font-size:13px; }
+
+  /* ============ 筛选区 ============ */
+  .filters { background:#fff; border:1px solid var(--border); border-radius:12px;
+             padding:14px 16px; margin-bottom:20px; display:flex; flex-direction:column; gap:12px; }
+  .filter-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .filter-label { font-size:13px; color:var(--faint); width:60px; flex-shrink:0; }
+  .chips { display:flex; gap:8px; flex-wrap:wrap; }
+  .chip { padding:5px 14px; border-radius:999px; background:#fff; border:1px solid var(--border);
+          font-size:13px; color:var(--muted); cursor:pointer; white-space:nowrap; }
+  .chip:hover { border-color:#c3cdf0; color:var(--text); }
+  .chip.active { background:var(--primary-weak); border-color:var(--primary); color:var(--primary); font-weight:500; }
+  .select { height:30px; border:1px solid var(--border); border-radius:8px; background:#fff;
+            font-size:13px; color:var(--muted); padding:0 8px; }
+  .search { flex:1; min-width:220px; height:32px; border:1px solid var(--border); border-radius:8px;
+            padding:0 12px 0 32px; font-size:13px; outline:none;
+            background:#f7f8fa url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238f959e' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M21 21l-4.3-4.3'/%3E%3C/svg%3E") no-repeat 10px center; }
+  .search:focus { border-color:var(--primary); background-color:#fff; }
+
+  /* ============ 模型卡片 ============ */
+  .model-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(330px,1fr)); gap:16px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px 18px;
+          cursor:pointer; transition:border-color .15s, box-shadow .15s, transform .15s; }
+  .card:hover { border-color:var(--primary); box-shadow:0 6px 18px rgba(51,112,255,.10); transform:translateY(-2px); }
+  .card-head { display:flex; align-items:flex-start; gap:10px; }
+  .vendor-logo { width:34px; height:34px; border-radius:8px; color:#fff; font-weight:700;
+                 display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+  .model-id { font-family:"SF Mono",ui-monospace,Menlo,monospace; font-size:13.5px; font-weight:600;
+              word-break:break-all; }
+  .card-tags { display:flex; gap:6px; margin-top:5px; flex-wrap:wrap; }
+  .tag { font-size:11.5px; padding:1.5px 8px; border-radius:4px; }
+  .tag-type { background:#f2f3f5; color:#4b5159; }
+  .tag-free { background:var(--green-weak); color:var(--green); }
+  .tag-pay { background:var(--primary-weak); color:var(--primary); }
+  .tag-hot { background:#fff1e6; color:var(--orange); }
+  .desc { font-size:12.5px; color:var(--muted); line-height:1.65; margin:10px 0;
+          display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; min-height:41px; }
+  .abilities { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
+  .ability { font-size:11.5px; color:#4b5159; background:#f2f3f5; border-radius:4px; padding:2px 8px; }
+  .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:8px;
+           border-top:1px dashed var(--border); padding-top:12px; }
+  .stat .k { font-size:11px; color:var(--faint); margin-bottom:2px; }
+  .stat .v { font-size:13px; font-weight:600; font-variant-numeric:tabular-nums; }
+  .stat .v small { font-size:10.5px; color:var(--faint); font-weight:400; }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-logo">K</div><div class="brand-name">Ker API</div></div>
+    <div class="nav-group">概览 / Overview</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>仪表盘</div>
+    <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>模型广场</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>模型调用监控</div>
+    <div class="nav-group">管理 / Management</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2 20 3M15 8l3 3M18 5l3 3"/></svg>API Key 管理</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg>余额充值</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>使用日志</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h12M6 21h12M8 3c0 8 8 8 8 18M16 3c0 8-8 8-8 18"/></svg>账单中心</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16v13H4zM4 7l2-4h12l2 4M12 7v13"/></svg>发票管理</div>
+    <div class="nav-group">文档 / Docs</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19a2 2 0 0 1 2-2h14V3H6a2 2 0 0 0-2 2zM4 19a2 2 0 0 0 2 2h14v-4"/></svg>文档中心</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M10.3 21a2 2 0 0 0 3.4 0"/></svg>通知公告</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-4-7.5M21 3v6h-6"/></svg>工单反馈</div>
+    <div class="nav-group">账户 / Account</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg>个人资料</div>
+    <div class="sidebar-foot"><div class="avatar">DY</div><div><div style="font-size:13px;font-weight:600">dyh_dev</div><div style="font-size:11px;color:var(--faint)">企业认证 · T3</div></div></div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="crumb">概览 / <b>模型广场</b></div>
+      <div class="topbar-right">
+        <span class="balance">余额 <b>¥ 1,208.50</b></span>
+        <button class="btn btn-primary">充值</button>
+      </div>
+    </div>
+
+    <!-- ================= 模型广场（列表） ================= -->
+    <div class="page" id="listView">
+      <div class="page-head">
+        <div>
+          <h1>模型广场</h1>
+          <div class="sub">支持按模型类型、收费类型、供应商、用户等级筛选，价格按 K / M Tokens 展示</div>
+        </div>
+        <div class="count">共 <b>128</b> 个模型</div>
+      </div>
+
+      <div class="filters">
+        <div class="filter-row">
+          <input class="search" placeholder="搜索模型名称 / 供应商 / 标签…">
+        </div>
+        <div class="filter-row">
+          <span class="filter-label">模型类型</span>
+          <div class="chips">
+            <span class="chip active">全部</span><span class="chip">对话</span><span class="chip">生图</span>
+            <span class="chip">嵌入</span><span class="chip">重排序</span><span class="chip">语音</span><span class="chip">视频</span>
+          </div>
+        </div>
+        <div class="filter-row">
+          <span class="filter-label">更多筛选</span>
+          <select class="select"><option>收费类型：全部</option><option>免费</option><option>按量付费</option><option>按张收费</option></select>
+          <select class="select"><option>供应商：全部</option><option>DeepSeek</option><option>Qwen</option><option>智谱 GLM</option><option>月之暗面 Kimi</option><option>MiniMax</option></select>
+          <select class="select"><option>用户等级：全部</option><option>T1 试用</option><option>T2 个人</option><option>T3 企业</option><option>T4 / T5</option></select>
+          <select class="select"><option>排序：最热</option><option>最新上架</option><option>输入价格从低到高</option><option>输出价格从低到高</option></select>
+        </div>
+      </div>
+
+      <div class="model-grid">
+        <div class="card" onclick="showDetail()">
+          <div class="card-head"><div class="vendor-logo" style="background:#1e50a2">DS</div><div><div class="model-id">deepseek-ai/DeepSeek-V3.2</div><div class="card-tags"><span class="tag tag-type">对话</span><span class="tag tag-pay">按量付费</span><span class="tag tag-hot">最热</span></div></div></div>
+          <div class="desc">DeepSeek 新一代通用旗舰模型，MoE 架构，编码与推理能力全面升级，支持 1M 上下文、工具调用与 JSON 输出，适合 Agent 与生产级应用。</div>
+          <div class="abilities"><span class="ability">工具调用</span><span class="ability">前缀续写</span><span class="ability">JSON 模式</span></div>
+          <div class="stats"><div class="stat"><div class="k">输入价格</div><div class="v">¥0.5<small>/M</small></div></div><div class="stat"><div class="k">输出价格</div><div class="v">¥2<small>/M</small></div></div><div class="stat"><div class="k">上下文长度</div><div class="v">1M</div></div><div class="stat"><div class="k">最大输出</div><div class="v">64K</div></div></div>
+        </div>
+        <div class="card" onclick="showDetail()">
+          <div class="card-head"><div class="vendor-logo" style="background:#1e50a2">DS</div><div><div class="model-id">deepseek-ai/DeepSeek-R1</div><div class="card-tags"><span class="tag tag-type">对话 · 推理</span><span class="tag tag-pay">按量付费</span></div></div></div>
+          <div class="desc">DeepSeek 推理模型，输出完整思维链，数学、代码与逻辑推理表现突出，适合复杂分析任务。</div>
+          <div class="abilities"><span class="ability">工具调用</span><span class="ability">思维链</span></div>
+          <div class="stats"><div class="stat"><div class="k">输入价格</div><div class="v">¥1<small>/M</small></div></div><div class="stat"><div class="k">输出价格</div><div class="v">¥8<small>/M</small></div></div><div class="stat"><div class="k">上下文长度</div><div class="v">128K</div></div><div class="stat"><div class="k">最大输出</div><div class="v">32K</div></div></div>
+        </div>
+        <div class="card" onclick="showDetail()">
+          <div class="card-head"><div class="vendor-logo" style="background:#6157d8">QW</div><div><div class="model-id">Qwen/Qwen3-235B-A22B-Instruct</div><div class="card-tags"><span class="tag tag-type">对话</span><span class="tag tag-free">免费</span></div></div></div>
+          <div class="desc">通义千问开源旗舰 MoE 模型，总参数 235B 激活 22B，通用能力均衡，平台限时免费开放。</div>
+          <div class="abilities"><span class="ability">工具调用</span><span class="ability">思维链</span><span class="ability">JSON 模式</span></div>
+          <div class="stats"><div class="stat"><div class="k">输入价格</div><div class="v" style="color:var(--green)">免费</div></div><div class="stat"><div class="k">输出价格</div><div class="v" style="color:var(--green)">免费</div></div><div class="stat"><div class="k">上下文长度</div><div class="v">256K</div></div><div class="stat"><div class="k">最大输出</div><div class="v">32K</div></div></div>
+        </div>
+        <div class="card" onclick="showDetail()">
+          <div class="card-head"><div class="vendor-logo" style="background:#6157d8">QW</div><div><div class="model-id">Qwen/Qwen2.5-VL-72B-Instruct</div><div class="card-tags"><span class="tag tag-type">对话 · 视觉</span><span class="tag tag-pay">按量付费</span></div></div></div>
+          <div class="desc">视觉语言模型，支持图像理解、文档表格解析、视觉定位与视频理解，多模态任务表现领先。</div>
+          <div class="abilities"><span class="ability">视觉输入</span><span class="ability">工具调用</span></div>
+          <div class="stats"><div class="stat"><div class="k">输入价格</div><div class="v">¥2.5<small>/M</small></div></div><div class="stat"><div class="k">输出价格</div><div class="v">¥8<small>/M</small></div></div><div class="stat"><div class="k">上下文长度</div><div class="v">128K</div></div><div class="stat"><div class="k">最大输出</div><div class="v">8K</div></div></div>
+        </div>
+        <div class="card" onclick="showDetail()">
+          <div class="card-head"><div class="vendor-logo" style="background:#3859c9">GL</div><div><div class="model-id">zai-org/GLM-4.6</div><div class="card-tags"><span class="tag tag-type">对话</span><span class="tag tag-pay">按量付费</span></div></div></div>
+          <div class="desc">智谱新一代旗舰模型，长上下文与编码能力增强，适合编程助手与复杂 Agent 场景。</div>
+          <div class="abilities"><span class="ability">工具调用</span><span class="ability">JSON 模式</span></div>
+          <div class="stats"><div class="stat"><div class="k">输入价格</div><div class="v">¥3<small>/M</small></div></div><div class="stat"><div class="k">输出价格</div><div class="v">¥14<small>/M</small></div></div><div class="stat"><div class="k">上下文长度</div><div class="v">200K</div></div><div class="stat"><div class="k">最大输出</div><div class="v">32K</div></div></div>
+        </div>
+        <div class="card" onclick="showDetail()">
+          <div class="card-head"><div class="vendor-logo" style="background:#16a34a">KM</div><div><div class="model-id">moonshotai/Kimi-K2-Instruct</div><div class="card-tags"><span class="tag tag-type">对话</span><span class="tag tag-pay">按量付费</span><span class="tag tag-hot">最热</span></div></div></div>
+          <div class="desc">月之暗面 1T 参数 MoE 模型，每 token 激活 32B，在编码与通用 Agent 任务上对标顶尖商业模型。</div>
+          <div class="abilities"><span class="ability">工具调用</span><span class="ability">前缀续写</span></div>
+          <div class="stats"><div class="stat"><div class="k">输入价格</div><div class="v">¥1<small>/M</small></div></div><div class="stat"><div class="k">输出价格</div><div class="v">¥4<small>/M</small></div></div><div class="stat"><div class="k">上下文长度</div><div class="v">128K</div></div><div class="stat"><div class="k">最大输出</div><div class="v">8K</div></div></div>
+        </div>
+        <div class="card" onclick="showDetail()">
+          <div class="card-head"><div class="vendor-logo" style="background:#6157d8">QW</div><div><div class="model-id">Qwen/Qwen3-Embedding-8B</div><div class="card-tags"><span class="tag tag-type">嵌入</span><span class="tag tag-free">免费</span></div></div></div>
+          <div class="desc">新一代文本向量模型，多语言检索效果领先，广泛用于 RAG 知识库与语义搜索场景。</div>
+          <div class="abilities"><span class="ability">文本向量</span></div>
+          <div class="stats"><div class="stat"><div class="k">输入价格</div><div class="v" style="color:var(--green)">免费</div></div><div class="stat"><div class="k">输出价格</div><div class="v">—</div></div><div class="stat"><div class="k">上下文长度</div><div class="v">32K</div></div><div class="stat"><div class="k">向量维度</div><div class="v">4096</div></div></div>
+        </div>
+        <div class="card" onclick="showDetail()">
+          <div class="card-head"><div class="vendor-logo" style="background:#0e7490">BA</div><div><div class="model-id">BAAI/bge-reranker-v2-m3</div><div class="card-tags"><span class="tag tag-type">重排序</span><span class="tag tag-free">免费</span></div></div></div>
+          <div class="desc">轻量级重排序模型，对召回结果进行精排，显著提升 RAG 场景下的命中率。</div>
+          <div class="abilities"><span class="ability">重排序</span></div>
+          <div class="stats"><div class="stat"><div class="k">输入价格</div><div class="v" style="color:var(--green)">免费</div></div><div class="stat"><div class="k">输出价格</div><div class="v">—</div></div><div class="stat"><div class="k">上下文长度</div><div class="v">8K</div></div><div class="stat"><div class="k">最大输出</div><div class="v">—</div></div></div>
+        </div>
+        <div class="card" onclick="showDetail()">
+          <div class="card-head"><div class="vendor-logo" style="background:#6157d8">QW</div><div><div class="model-id">Qwen/Qwen3-8B</div><div class="card-tags"><span class="tag tag-type">对话</span><span class="tag tag-free">免费</span></div></div></div>
+          <div class="desc">小尺寸高性价比模型，响应速度快，适合轻量对话、分类抽取等高并发场景。</div>
+          <div class="abilities"><span class="ability">工具调用</span><span class="ability">JSON 模式</span></div>
+          <div class="stats"><div class="stat"><div class="k">输入价格</div><div class="v" style="color:var(--green)">免费</div></div><div class="stat"><div class="k">输出价格</div><div class="v" style="color:var(--green)">免费</div></div><div class="stat"><div class="k">上下文长度</div><div class="v">128K</div></div><div class="stat"><div class="k">最大输出</div><div class="v">16K</div></div></div>
+        </div>
+        <div class="card" onclick="showDetail()">
+          <div class="card-head"><div class="vendor-logo" style="background:#b45309">FV</div><div><div class="model-id">FunAudioLLM/SenseVoiceSmall</div><div class="card-tags"><span class="tag tag-type">语音识别</span><span class="tag tag-free">免费</span></div></div></div>
+          <div class="desc">多语种语音识别模型，支持中英日韩粤，自带情感与事件检测，推理速度快。</div>
+          <div class="abilities"><span class="ability">语音转文本</span></div>
+          <div class="stats"><div class="stat"><div class="k">输入价格</div><div class="v" style="color:var(--green)">免费</div></div><div class="stat"><div class="k">输出价格</div><div class="v">—</div></div><div class="stat"><div class="k">采样率</div><div class="v">16kHz</div></div><div class="stat"><div class="k">单次时长</div><div class="v">≤ 5min</div></div></div>
+        </div>
+        <div class="card" onclick="showDetail()">
+          <div class="card-head"><div class="vendor-logo" style="background:#0e7490">FS</div><div><div class="model-id">fishaudio/fish-speech-1.5</div><div class="card-tags"><span class="tag tag-type">语音合成</span><span class="tag tag-pay">按量付费</span></div></div></div>
+          <div class="desc">高质量文本转语音模型，支持音色克隆与多语种合成，发音自然、情感表现力强。</div>
+          <div class="abilities"><span class="ability">文本转语音</span><span class="ability">音色克隆</span></div>
+          <div class="stats"><div class="stat"><div class="k">输入价格</div><div class="v">¥15<small>/M 字符</small></div></div><div class="stat"><div class="k">输出价格</div><div class="v">—</div></div><div class="stat"><div class="k">支持语种</div><div class="v">13</div></div><div class="stat"><div class="k">单次时长</div><div class="v">≤ 3min</div></div></div>
+        </div>
+        <div class="card" onclick="showDetail()">
+          <div class="card-head"><div class="vendor-logo" style="background:#e0662d">KK</div><div><div class="model-id">Kwai-Kolors/Kolors</div><div class="card-tags"><span class="tag tag-type">生图</span><span class="tag tag-pay">按张收费</span></div></div></div>
+          <div class="desc">文生图模型，支持中英文提示词，在人物写真与艺术风格生成上表现出色。</div>
+          <div class="abilities"><span class="ability">文生图</span><span class="ability">图生图</span></div>
+          <div class="stats"><div class="stat"><div class="k">单价</div><div class="v">¥0.16<small>/张</small></div></div><div class="stat"><div class="k">最大分辨率</div><div class="v">2048²</div></div><div class="stat"><div class="k">并发上限</div><div class="v">5</div></div><div class="stat"><div class="k">用户等级</div><div class="v">T2 起</div></div></div>
+        </div>
+      </div>
+    </div>
+<style>
+  .detail { display:none; }
+  .detail.active { display:block; }
+  .d-back { display:inline-flex; align-items:center; gap:6px; color:var(--muted); font-size:13px;
+            cursor:pointer; margin-bottom:14px; padding:6px 10px; border-radius:8px; }
+  .d-back:hover { background:#eceef1; color:var(--text); }
+  .d-head { background:#fff; border:1px solid var(--border); border-radius:12px; padding:22px 24px;
+            display:flex; justify-content:space-between; gap:20px; }
+  .d-title { display:flex; gap:14px; align-items:flex-start; }
+  .d-title .vendor-logo { width:44px; height:44px; font-size:17px; border-radius:10px; }
+  .d-title h1 { font-size:20px; font-family:"SF Mono",ui-monospace,Menlo,monospace; }
+  .d-title .card-tags { margin-top:6px; }
+  .d-intro { color:var(--muted); font-size:13px; line-height:1.7; margin-top:10px; max-width:720px; }
+  .d-actions { display:flex; gap:10px; flex-shrink:0; align-items:flex-start; }
+  .spec-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:12px; margin-top:16px; }
+  .spec { background:#fff; border:1px solid var(--border); border-radius:10px; padding:13px 14px; }
+  .spec .k { font-size:11.5px; color:var(--faint); margin-bottom:4px; }
+  .spec .v { font-size:14px; font-weight:600; }
+  .section { background:#fff; border:1px solid var(--border); border-radius:12px; padding:20px 24px; margin-top:16px; }
+  .section > h2 { font-size:15px; font-weight:700; margin-bottom:14px; }
+  .section .note { font-size:12px; color:var(--faint); margin-top:10px; line-height:1.6; }
+  table.data { width:100%; border-collapse:collapse; font-size:13px; }
+  table.data th { text-align:left; background:#f7f8fa; color:var(--muted); font-weight:500;
+                  padding:9px 14px; border-bottom:1px solid var(--border); }
+  table.data td { padding:10px 14px; border-bottom:1px solid #f0f1f3; font-variant-numeric:tabular-nums; }
+  table.data tr:last-child td { border-bottom:none; }
+  .api-chips { display:flex; gap:8px; flex-wrap:wrap; }
+  .api-chip { display:inline-flex; align-items:center; gap:6px; border:1px solid var(--border);
+              border-radius:8px; padding:6px 12px; font-size:12.5px; font-family:ui-monospace,Menlo,monospace; }
+  .api-chip .method { font-size:10.5px; color:var(--green); background:var(--green-weak); padding:1px 6px; border-radius:4px; font-weight:700; }
+  .tabs { display:flex; gap:2px; border-bottom:1px solid var(--border); margin-bottom:12px; }
+  .tab { padding:8px 18px; font-size:13px; cursor:pointer; color:var(--muted);
+         border-bottom:2px solid transparent; margin-bottom:-1px; }
+  .tab.active { color:var(--primary); border-color:var(--primary); font-weight:600; }
+  .code-wrap { position:relative; }
+  .copy-btn { position:absolute; top:10px; right:10px; background:rgba(255,255,255,.12); color:#c9d1d9;
+              border:none; border-radius:6px; padding:5px 12px; font-size:12px; cursor:pointer; }
+  .copy-btn:hover { background:rgba(255,255,255,.22); }
+  pre.code { background:#0d1117; color:#c9d1d9; border-radius:10px; padding:16px 18px;
+             font-family:"SF Mono",ui-monospace,Menlo,monospace; font-size:12.5px; line-height:1.75; overflow:auto; }
+  pre.code .cm { color:#8b949e; } pre.code .str { color:#a5d6ff; } pre.code .kw { color:#ff7b72; }
+</style>
+
+<!-- ================= 模型详情 ================= -->
+<div class="page detail" id="detailView">
+  <div class="d-back" onclick="showList()">← 返回模型广场</div>
+
+  <div class="d-head">
+    <div class="d-title">
+      <div class="vendor-logo" style="background:#1e50a2">DS</div>
+      <div>
+        <h1>deepseek-ai/DeepSeek-V3.2</h1>
+        <div class="card-tags"><span class="tag tag-type">对话</span><span class="tag tag-pay">按量付费</span><span class="tag tag-hot">最热</span><span class="tag tag-type">DeepSeek</span></div>
+        <div class="d-intro">DeepSeek 新一代通用旗舰模型，MoE 架构，编码与推理能力全面升级，支持 1M 上下文、工具调用与 JSON 输出，适合 Agent 与生产级应用。一句话简介由供应商提供，展示在模型名称下方。</div>
+      </div>
+    </div>
+    <div class="d-actions">
+      <button class="btn" onclick="copyText('deepseek-ai/DeepSeek-V3.2', this)">复制模型名</button>
+      <button class="btn btn-primary">在线体验</button>
+    </div>
+  </div>
+
+  <div class="spec-grid">
+    <div class="spec"><div class="k">上下文长度</div><div class="v">1M Tokens</div></div>
+    <div class="spec"><div class="k">最大输出</div><div class="v">64K Tokens</div></div>
+    <div class="spec"><div class="k">输入类型</div><div class="v">文本 / 图像</div></div>
+    <div class="spec"><div class="k">输出类型</div><div class="v">文本</div></div>
+    <div class="spec"><div class="k">收费类型</div><div class="v">按 Token</div></div>
+    <div class="spec"><div class="k">可用等级</div><div class="v">T1 起可用</div></div>
+  </div>
+
+  <div class="section">
+    <h2>价格明细</h2>
+    <table class="data">
+      <tr><th>用户等级</th><th>渠道</th><th>输入价格</th><th>输出价格</th><th>上下文缓存</th></tr>
+      <tr><td>T1 · 试用</td><td>标准渠道</td><td>¥0.50 / M Tokens</td><td>¥2.00 / M Tokens</td><td>¥0.10 / M Tokens</td></tr>
+      <tr><td>T2 · 个人认证</td><td>标准渠道</td><td>¥0.45 / M Tokens</td><td>¥1.80 / M Tokens</td><td>¥0.09 / M Tokens</td></tr>
+      <tr><td>T3 · 企业认证</td><td>标准渠道</td><td>¥0.40 / M Tokens</td><td>¥1.60 / M Tokens</td><td>¥0.08 / M Tokens</td></tr>
+    </table>
+    <div class="note">价格按渠道基础折扣展示，随用户等级自动生效；图像 / 音频 / 视频等多模态输入按字段倍率计费（如视觉输入 ×1.5），具体以计费规则文档为准。</div>
+  </div>
+
+  <div class="section">
+    <h2>Rate Limits（按用户等级）</h2>
+    <table class="data">
+      <tr><th>等级</th><th>RPM（请求数 / 分钟）</th><th>TPM（Tokens / 分钟）</th></tr>
+      <tr><td>T1</td><td>5</td><td>50,000,000</td></tr>
+      <tr><td>T2</td><td>100</td><td>50,000,000</td></tr>
+      <tr><td>T3</td><td>1,200</td><td>50,000,000</td></tr>
+      <tr><td>T4</td><td>3,200</td><td>50,000,000</td></tr>
+      <tr><td>T5</td><td>6,000</td><td>50,000,000</td></tr>
+    </table>
+    <div class="note">默认展示当前用户等级对应行并高亮；该模块是否在详情页展示待产品确认（PRD 标记待定）。</div>
+  </div>
+
+  <div class="section">
+    <h2>支持的 API</h2>
+    <div class="api-chips">
+      <span class="api-chip"><span class="method">POST</span>/v1/chat/completions</span>
+      <span class="api-chip"><span class="method">POST</span>/v1/responses</span>
+      <span class="api-chip"><span class="method">POST</span>/v1/chat/partial</span>
+      <span class="api-chip"><span class="method">POST</span>/v1/chat/generic</span>
+      <span class="api-chip"><span class="method">POST</span>/v1/generate_content</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>代码示例</h2>
+    <div class="tabs">
+      <span class="tab active" onclick="switchCode(this,'codeChat')">Chat</span>
+      <span class="tab" onclick="switchCode(this,'codeResp')">Responses</span>
+    </div>
+    <div class="code-wrap" id="codeChat">
+      <button class="copy-btn" onclick="copyCode(this)">复制</button>
+      <pre class="code">from openai import OpenAI
+
+client = OpenAI(
+    api_key="<span class="str">$KER_API_KEY</span>",
+    base_url="<span class="str">https://api.kerapi.cn/v1</span>"
+)
+
+response = client.chat.completions.create(
+    model=<span class="str">"deepseek-ai/DeepSeek-V3.2"</span>,
+    messages=[
+        {<span class="str">"role"</span>: <span class="str">"system"</span>, <span class="str">"content"</span>: <span class="str">"You are a helpful assistant."</span>},
+        {<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: <span class="str">"你好，请介绍一下你自己。"</span>}
+    ]
+)
+
+print(response.choices[0].message.content)</pre>
+    </div>
+    <div class="code-wrap" id="codeResp" style="display:none">
+      <button class="copy-btn" onclick="copyCode(this)">复制</button>
+      <pre class="code">curl https://api.kerapi.cn/v1/responses \
+  -H <span class="str">"Authorization: Bearer $KER_API_KEY"</span> \
+  -H <span class="str">"Content-Type: application/json"</span> \
+  -d '{
+    <span class="str">"model"</span>: <span class="str">"deepseek-ai/DeepSeek-V3.2"</span>,
+    <span class="str">"input"</span>: <span class="str">"写一首关于秋天的诗"</span>
+  }'</pre>
+    </div>
+  </div>
+</div>
+  </main>
+</div>
+<script>
+  function showDetail() {
+    document.getElementById('listView').style.display = 'none';
+    document.getElementById('detailView').classList.add('active');
+    window.scrollTo(0, 0);
+  }
+  function showList() {
+    document.getElementById('detailView').classList.remove('active');
+    document.getElementById('listView').style.display = 'block';
+    window.scrollTo(0, 0);
+  }
+  function switchCode(tab, id) {
+    document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('codeChat').style.display = id === 'codeChat' ? 'block' : 'none';
+    document.getElementById('codeResp').style.display = id === 'codeResp' ? 'block' : 'none';
+  }
+  document.querySelectorAll('.filters .chips .chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      chip.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+    });
+  });
+  function copyText(text, btn) {
+    navigator.clipboard.writeText(text).then(() => {
+      const old = btn.textContent; btn.textContent = '已复制';
+      setTimeout(() => btn.textContent = old, 1200);
+    });
+  }
+  function copyCode(btn) {
+    const code = btn.parentElement.querySelector('pre').innerText;
+    copyText(code, btn);
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>模型广场 · KerAPI</title>
+<style>
+:root {
+  --primary: #16181d;
+  --primary-deep: #000000;
+  --primary-bg: #eef0f4;
+  --bg: #f7f8fa;
+  --card: #ffffff;
+  --border: #e8eaef;
+  --border-2: #d9dce3;
+  --text: #1a1d24;
+  --text-2: #585e6b;
+  --text-3: #8a90a0;
+  --green: #0f9d58;
+  --green-bg: #e8f7ef;
+  --amber: #b45309;
+  --amber-bg: #fef3e2;
+  --radius: 14px;
+  --shadow-1: 0 1px 2px rgba(16, 18, 27, .04);
+  --shadow-2: 0 8px 24px rgba(16, 18, 27, .10);
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+[hidden] { display: none !important; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.6;
+}
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+input, select { font-family: inherit; }
+::selection { background: #e2e5ea; }
+
+/* ---------- 通用按钮 / Logo ---------- */
+.logo-mark {
+  width: 30px; height: 30px; border-radius: 8px; flex: none;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.92) 0%, rgba(255,255,255,.55) 100%) padding-box,
+    linear-gradient(135deg, #2a2d35 0%, #101218 100%);
+  position: relative; display: grid; place-items: center;
+}
+.logo-mark::before {
+  content: ""; width: 14px; height: 14px; background: #c9cdd6;
+  transform: rotate(45deg) scale(.82); border-radius: 2px;
+  background: conic-gradient(from 45deg, #d7dae2 0 25%, #7c828f 0 50%, #d7dae2 0 75%, #7c828f 0);
+}
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 36px; padding: 0 16px; border-radius: 9px; font-size: 14px; font-weight: 500;
+  transition: all .15s; white-space: nowrap;
+}
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-deep); }
+.btn-ghost { border: 1px solid var(--border-2); color: var(--text); background: #fff; }
+.btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
+
+/* ---------- 顶部导航 ---------- */
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(255,255,255,.88); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.topbar-inner {
+  max-width: 1280px; margin: 0 auto; padding: 0 24px;
+  height: 60px; display: flex; align-items: center;
+}
+.logo { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 700; letter-spacing: .2px; }
+.nav-links { display: flex; gap: 8px; margin-left: auto; align-items: center; }
+.nav-links a {
+  padding: 7px 14px; border-radius: 8px; font-size: 14px; color: var(--text-2); transition: all .15s;
+}
+.nav-links a:hover { color: var(--text); }
+.nav-links a.active { color: #16181d; font-weight: 600; }
+.topbar-actions { display: flex; align-items: center; gap: 10px; margin-left: 16px; }
+.btn-pill {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 36px; padding: 0 18px; border-radius: 999px; font-size: 14px; font-weight: 500;
+  background: #16181d; color: #fff; transition: all .15s;
+}
+.btn-pill:hover { background: #000; }
+
+/* ---------- Hero（半屏居中，参考硅基流动模型广场） ---------- */
+.hero {
+  position: relative; overflow: hidden; text-align: center;
+  padding: 72px 24px 60px;
+  background:
+    radial-gradient(120% 90% at 50% -20%, #e7e9ef 0%, rgba(231, 233, 239, 0) 60%),
+    linear-gradient(180deg, #eef0f4 0%, rgba(247, 248, 250, 0) 100%);
+}
+.hero-inner { max-width: 720px; margin: 0 auto; position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; }
+.badge-pill { display: inline-flex; padding: 4px 12px; border-radius: 999px; background: rgba(255, 255, 255, .75); font-size: 12.5px; color: var(--text-2); }
+.hero h1 { font-size: 46px; font-weight: 700; letter-spacing: .5px; margin-top: 16px; line-height: 1.25; }
+.hero h1 .grad { background: linear-gradient(92deg, #16181d 10%, #4b5563 60%, #6b7280 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero .sub { margin-top: 12px; font-size: 16px; color: var(--text-2); }
+.hero .sub b { color: var(--text); }
+.hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.search-box {
+  width: min(480px, 100%); margin: 30px auto 0; display: flex; align-items: center;
+  background: #fff; border: 1.5px solid var(--border-2); border-radius: 12px;
+  padding: 0 6px 0 16px; height: 48px; box-shadow: var(--shadow-1); transition: border-color .15s;
+}
+.search-box:focus-within { border-color: #16181d; }
+.search-box svg { flex: none; color: var(--text-3); }
+.search-box input { flex: 1; border: none; outline: none; font-size: 15px; height: 100%; background: transparent; }
+.search-box input::placeholder { color: var(--text-3); }
+.search-box .btn { height: 36px; }
+.hot-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+.hot-row .lbl { font-size: 13px; color: var(--text-3); }
+.hot-chip {
+  padding: 4px 12px; border-radius: 999px; background: #fff; border: 1px solid var(--border);
+  font-size: 13px; color: var(--text-2); transition: all .15s;
+}
+.hot-chip:hover { border-color: #16181d; color: #16181d; background: #f5f5f7; }
+
+/* ---------- 筛选 chips（控制台筛选面板复用） ---------- */
+.f-row { display: flex; align-items: flex-start; gap: 14px; padding: 6px 0; }
+.f-label { flex: none; width: 62px; padding-top: 6px; font-size: 13px; color: var(--text-3); }
+.f-opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.f-opt {
+  padding: 5px 13px; border-radius: 8px; font-size: 13px; color: var(--text-2);
+  background: #fff; border: 1px solid var(--border); transition: all .15s; display: inline-flex; gap: 6px; align-items: center;
+}
+.f-opt:hover { border-color: var(--primary); color: var(--primary); }
+.f-opt.active { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 500; }
+.f-divider { height: 1px; background: var(--border); margin: 8px 0; }
+.f-bottom { display: flex; align-items: center; justify-content: space-between; padding-top: 10px; gap: 12px; flex-wrap: wrap; }
+.result-count { font-size: 13px; color: var(--text-3); }
+.result-count b { color: var(--text); font-weight: 600; }
+.f-tools { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.f-tools .tool-lbl { font-size: 13px; color: var(--text-3); }
+.sort-select {
+  height: 32px; border-radius: 8px; border: 1px solid var(--border-2); background: #fff;
+  font-size: 13px; color: var(--text); padding: 0 8px; outline: none; cursor: pointer;
+}
+.seg { display: inline-flex; background: #eef0f4; border-radius: 9px; padding: 3px; }
+.seg button {
+  height: 28px; padding: 0 12px; border-radius: 7px; font-size: 13px; color: var(--text-2); transition: all .15s;
+}
+.seg button.active { background: #16181d; color: #fff; font-weight: 600; box-shadow: none; }
+.seg button .tip { display: block; font-size: 10px; line-height: 1.2; opacity: .7; font-weight: 400; }
+
+/* ---------- 价值点横幅（hero 与模型列表之间） ---------- */
+.value-strip {
+  max-width: 1280px; margin: 0 auto; padding: 6px 24px 26px;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+}
+.vs-item {
+  background: #fff; border: 1px solid var(--border); border-radius: 12px;
+  padding: 14px 18px; display: flex; flex-direction: column; gap: 2px;
+}
+.vs-item b { font-size: 18px; font-weight: 700; }
+.vs-item span { font-size: 12.5px; color: var(--text-3); }
+
+/* ---------- 筛选区（一级页常驻筛选条） ---------- */
+.filterbar {
+  position: sticky; top: 60px; z-index: 90;
+  background: rgba(255,255,255,.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border); margin-top: 0;
+}
+.filter-inner { max-width: 1280px; margin: 0 auto; padding: 14px 24px 12px; }
+
+/* ---------- 卡片通用 ---------- */
+.avatar {
+  width: 38px; height: 38px; border-radius: 10px; flex: none; display: grid; place-items: center;
+  color: #fff; font-size: 16px; font-weight: 700;
+}
+.badge {
+  display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 6px;
+  font-size: 12px; font-weight: 500; white-space: nowrap;
+}
+.b-type-chat, .b-type-image, .b-type-video, .b-type-audio,
+.b-type-embedding, .b-type-rerank { background: #f3f4f7; color: #1a1d24; }
+.b-free  { background: var(--green-bg); color: var(--green); }
+.b-pro   { background: #16181d; color: #fff; }
+.b-status { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-3); }
+.b-status i { width: 6px; height: 6px; border-radius: 50%; background: var(--green); display: inline-block; }
+.b-status.st-preview i { background: #d97706; }
+.b-status.st-preview { color: var(--amber); }
+.cap { font-size: 12px; color: var(--text-2); background: #f3f4f7; border-radius: 6px; padding: 2px 8px; }
+.empty-state { text-align: center; padding: 80px 0; color: var(--text-3); }
+.empty-state .t { font-size: 15px; margin-bottom: 6px; color: var(--text-2); }
+
+/* ---------- 一级页模型卡片 ---------- */
+.cards-wrap { max-width: 1280px; margin: 0 auto; padding: 22px 24px 56px; }
+.cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.card {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 18px 18px 14px; cursor: pointer; display: flex; flex-direction: column; gap: 10px;
+  transition: transform .18s, box-shadow .18s, border-color .18s; position: relative;
+}
+.card:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); border-color: #c7cbd4; }
+.card-head { display: flex; align-items: flex-start; gap: 10px; }
+.card-titles { flex: 1; min-width: 0; }
+.card-name { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.card-name .nm { font-size: 15px; font-weight: 650; }
+.card-name .free-dot { color: var(--green); font-size: 12px; font-weight: 600; }
+.model-id { font-family: var(--mono); font-size: 12px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card-desc {
+  font-size: 13px; color: var(--text-2); line-height: 1.55; height: 40px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.cap-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.card-metrics {
+  border-top: 1px dashed var(--border); margin-top: 2px; padding-top: 10px;
+  display: grid; grid-template-columns: 1fr; gap: 8px 12px;
+}
+.metric .m-lbl { font-size: 11px; color: var(--text-3); }
+.metric .m-val { font-size: 13px; font-weight: 600; margin-top: 1px; }
+.metric .m-val .unit { font-weight: 400; color: var(--text-3); font-size: 11px; }
+.card-foot {
+  border-top: 1px dashed var(--border); padding-top: 8px; margin-top: 2px;
+  display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--text-3);
+}
+.card-foot .sp { flex: 1; }
+.go-detail { font-size: 12px; color: var(--primary); opacity: 0; transform: translateX(-4px); transition: all .18s; display: inline-flex; align-items: center; gap: 3px; }
+.card:hover .go-detail { opacity: 1; transform: none; }
+
+/* ---------- 一级页配色（对齐官网设计：黑白灰） ---------- */
+.sort-select:focus { border-color: #16181d; }
+
+/* ---------- 模型详情页 ---------- */
+.detail-wrap { max-width: 1200px; margin: 0 auto; padding: 20px 24px 60px; }
+.detail-head {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 22px 24px; display: flex; gap: 16px; align-items: flex-start;
+}
+.dh-info { flex: 1; min-width: 0; }
+.dh-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.dh-name { font-size: 22px; font-weight: 700; }
+.dh-id {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 6px;
+  font-family: var(--mono); font-size: 13px; color: var(--text-2); background: #f3f4f7;
+  border-radius: 8px; padding: 4px 10px; width: fit-content;
+}
+.copy-mini { font-size: 12px; color: var(--text-3); cursor: pointer; border: none; background: none; }
+.copy-mini:hover { color: var(--primary); }
+.dh-badges { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
+.dh-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 16px; }
+.stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+.stat-card .s-lbl { font-size: 12px; color: var(--text-3); }
+.stat-card .s-val { font-size: 18px; font-weight: 700; margin-top: 2px; }
+.stat-card .s-val .unit { font-size: 12px; font-weight: 400; color: var(--text-3); }
+.detail-cols { display: grid; grid-template-columns: 1fr 380px; gap: 16px; margin-top: 16px; align-items: start; }
+.panel { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; }
+.panel + .panel { margin-top: 16px; }
+.panel h3 { font-size: 15px; font-weight: 650; display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.panel h3 .p-sub { font-size: 12px; color: var(--text-3); font-weight: 400; margin-left: auto; }
+.spec-table { width: 100%; border-collapse: collapse; }
+.spec-table th, .spec-table td { padding: 9px 12px; font-size: 13px; text-align: left; border-bottom: 1px solid #f0f1f4; }
+.spec-table tr:last-child th, .spec-table tr:last-child td { border-bottom: none; }
+.spec-table th { color: var(--text-3); font-weight: 400; width: 140px; }
+.price-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.price-table th, .price-table td { padding: 8px 10px; border-bottom: 1px solid #f0f1f4; text-align: right; }
+.price-table th { color: var(--text-3); font-weight: 500; white-space: nowrap; }
+.price-table td:first-child, .price-table th:first-child { text-align: left; }
+.price-table tr:last-child td { border-bottom: none; }
+.price-table .ch-name { font-weight: 600; }
+.price-table .ch-sub { font-size: 11px; color: var(--text-3); font-weight: 400; }
+.price-table .mult { display: inline-block; font-size: 10px; color: var(--text-2); background: #f3f4f7; border-radius: 4px; padding: 1px 5px; margin-left: 6px; vertical-align: 1px; }
+.price-table .dim td { color: var(--text-3); background: #fafbfc; font-size: 12px; }
+.price-table .cur-lv { color: var(--primary); font-weight: 700; }
+.callout {
+  margin-top: 12px; font-size: 12.5px; color: var(--text-2); background: var(--primary-bg);
+  border-radius: 10px; padding: 10px 12px; line-height: 1.6;
+}
+.api-list { display: flex; flex-direction: column; gap: 8px; }
+.api-item {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--border);
+  border-radius: 10px; font-size: 13px;
+}
+.api-item .mono { font-family: var(--mono); font-weight: 600; }
+.api-item .ok { margin-left: auto; color: var(--green); font-size: 12px; }
+.api-item .no { margin-left: auto; color: var(--text-3); font-size: 12px; }
+.detail-aside { position: sticky; top: 84px; display: flex; flex-direction: column; gap: 16px; }
+.code-card { background: #0f1117; border-radius: var(--radius); overflow: hidden; }
+.code-head { display: flex; align-items: center; padding: 10px 14px; border-bottom: 1px solid #23262f; flex-wrap: wrap; gap: 8px; }
+.code-tabs { display: flex; gap: 4px; }
+.code-tabs button {
+  padding: 5px 12px; border-radius: 7px; font-size: 12.5px; color: #9aa1b2; transition: all .15s;
+}
+.code-tabs button.active { background: #23262f; color: #fff; }
+.code-lang { display: flex; gap: 2px; margin-left: 8px; background: #171a21; border-radius: 7px; padding: 2px; }
+.code-lang button { padding: 4px 10px; border-radius: 6px; font-size: 12px; color: #9aa1b2; }
+.code-lang button.active { background: #2a2e39; color: #fff; }
+.copy-btn {
+  margin-left: auto; font-size: 12px; color: #c9cedb; display: inline-flex; gap: 5px; align-items: center;
+  padding: 5px 10px; border-radius: 7px; border: 1px solid #2a2e39; transition: all .15s;
+}
+.copy-btn:hover { color: #fff; border-color: #4a5060; }
+.code-card pre {
+  margin: 0; padding: 14px 16px; overflow-x: auto; font-family: var(--mono);
+  font-size: 12.5px; line-height: 1.65; color: #d6deeb; max-height: 320px;
+}
+.code-card pre .cmt { color: #5c6672; }
+.code-card pre .str { color: #9ece8c; }
+.code-card pre .kw { color: #c792ea; }
+.quick-links { display: flex; flex-direction: column; gap: 8px; }
+.ql-item {
+  display: flex; align-items: center; gap: 10px; padding: 11px 14px; border: 1px solid var(--border);
+  border-radius: 10px; font-size: 13.5px; background: #fff; transition: all .15s;
+}
+.ql-item:hover { border-color: var(--primary); color: var(--primary); }
+.ql-item .arr { margin-left: auto; color: var(--text-3); }
+.pg-card { margin-top: 16px; }
+.pg-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.pg-model-select {
+  margin-left: auto; height: 32px; border-radius: 8px; border: 1px solid var(--border-2);
+  background: #fff; font-size: 13px; padding: 0 8px; outline: none;
+}
+.pg-note { font-size: 12px; color: var(--text-3); margin: 8px 0 4px; }
+.pg-window {
+  margin-top: 10px; border: 1px solid var(--border); border-radius: 12px; background: #fafbfc;
+  height: 300px; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px;
+}
+.msg { max-width: 78%; padding: 10px 14px; border-radius: 12px; font-size: 13.5px; line-height: 1.6; white-space: pre-wrap; }
+.msg.ai { background: #fff; border: 1px solid var(--border); border-bottom-left-radius: 4px; align-self: flex-start; }
+.msg.user { background: var(--primary); color: #fff; border-bottom-right-radius: 4px; align-self: flex-end; }
+.msg .m-meta { display: block; font-size: 11px; color: var(--text-3); margin-bottom: 4px; }
+.pg-input { display: flex; gap: 10px; margin-top: 12px; }
+.pg-input textarea {
+  flex: 1; border: 1px solid var(--border-2); border-radius: 10px; padding: 10px 14px; font-size: 13.5px;
+  outline: none; resize: none; height: 44px; font-family: inherit;
+}
+.pg-input textarea:focus { border-color: var(--primary); }
+
+/* ---------- 模型详情右侧抽屉 ---------- */
+.drawer-mask {
+  position: fixed; inset: 0; z-index: 200; background: rgba(15, 17, 23, .45);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity .25s ease, visibility 0s linear .25s;
+}
+.drawer-mask.open { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity .25s ease; }
+.drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 201;
+  width: min(880px, 94vw); background: var(--bg); display: flex; flex-direction: column;
+  box-shadow: -16px 0 48px rgba(16, 18, 27, .22);
+  transform: translateX(103%); visibility: hidden; pointer-events: none;
+  transition: transform .32s cubic-bezier(.22, .68, .32, 1), visibility 0s linear .32s;
+}
+.drawer.open { transform: none; visibility: visible; pointer-events: auto; transition: transform .32s cubic-bezier(.22, .68, .32, 1); }
+.drawer-bar {
+  flex: none; height: 54px; display: flex; align-items: center; gap: 10px; padding: 0 14px 0 24px;
+  background: rgba(255, 255, 255, .92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+.drawer-bar .d-title { font-size: 15px; font-weight: 650; white-space: nowrap; }
+.drawer-bar .d-sub {
+  font-family: var(--mono); font-size: 12px; color: var(--text-3);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.drawer-close {
+  margin-left: auto; flex: none; width: 32px; height: 32px; border-radius: 8px;
+  display: grid; place-items: center; font-size: 14px; color: var(--text-2);
+  border: 1px solid transparent; transition: all .15s;
+}
+.drawer-close:hover { background: #f1f2f5; color: var(--text); border-color: var(--border); }
+.drawer-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.drawer .detail-wrap { max-width: none; margin: 0; padding: 18px 24px 48px; }
+.drawer .detail-cols { grid-template-columns: 1fr; }
+.drawer .detail-aside { position: static; }
+@media (max-width: 720px) { .drawer { width: 100vw; } .drawer-bar .d-sub { display: none; } }
+
+/* ---------- 控制台 · 模型广场 ---------- */
+.console { display: flex; min-height: 100vh; background: var(--bg); }
+.c-side {
+  width: 212px; flex: none; background: #fff; border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; padding: 14px 12px; position: sticky; top: 0;
+  height: 100vh; overflow-y: auto;
+}
+.c-logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; padding: 4px 8px 12px; }
+.c-group { font-size: 11.5px; color: var(--text-3); padding: 14px 8px 4px; }
+.c-nav { display: flex; flex-direction: column; gap: 2px; }
+.c-nav a {
+  display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px;
+  font-size: 13px; color: var(--text-2); transition: all .15s;
+}
+.c-nav a:hover { background: #f1f2f5; color: var(--text); }
+.c-nav a.active { background: var(--primary-bg); color: var(--primary); font-weight: 600; }
+.c-nav .beta { font-size: 10px; color: var(--primary); background: var(--primary-bg); border-radius: 4px; padding: 0 5px; margin-left: 4px; font-weight: 500; }
+.c-nav .ext { margin-left: auto; font-size: 11px; color: var(--text-3); }
+.c-user { margin-top: auto; border-top: 1px solid var(--border); padding: 12px 8px 4px; display: flex; gap: 10px; align-items: center; }
+.c-user .u-ava {
+  width: 32px; height: 32px; border-radius: 50%; flex: none;
+  background: linear-gradient(135deg, #2a2d35, #101218); color: #fff;
+  display: grid; place-items: center; font-size: 13px; font-weight: 600;
+}
+.c-user .u-name { font-size: 13px; font-weight: 600; }
+.c-user .u-sub { font-size: 11px; color: var(--amber); }
+.c-main { flex: 1; min-width: 0; }
+.c-top {
+  height: 56px; background: #fff; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px; padding: 0 24px;
+  position: sticky; top: 0; z-index: 20;
+}
+.c-top .burger { color: var(--text-3); font-size: 16px; }
+.c-top .t { font-size: 15px; font-weight: 650; }
+.c-body { padding: 20px 24px 48px; max-width: 1440px; }
+.c-toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.c-filter-toggle {
+  display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px;
+  border: 1px solid var(--border-2); border-radius: 9px; background: #fff; font-size: 13.5px;
+  color: var(--text); transition: all .15s;
+}
+.c-filter-toggle:hover, .c-filter-toggle.open { border-color: var(--primary); color: var(--primary); }
+.c-search {
+  flex: 1; max-width: 520px; display: flex; align-items: center; background: #fff;
+  border: 1px solid var(--border-2); border-radius: 9px; height: 38px; padding: 0 4px 0 14px;
+}
+.c-search:focus-within { border-color: var(--primary); }
+.c-search input { flex: 1; border: none; outline: none; font-size: 13.5px; background: transparent; min-width: 0; }
+.c-search input::placeholder { color: var(--text-3); }
+.c-search .s-btn { width: 32px; height: 30px; display: grid; place-items: center; color: var(--text-3); border-radius: 7px; }
+.c-search .s-btn:hover { color: var(--primary); background: var(--primary-bg); }
+.c-count { margin-left: auto; font-size: 13px; color: var(--text-3); }
+.c-count b { color: var(--text); }
+.c-filter-panel { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 10px 16px 14px; margin-bottom: 16px; }
+.c-filter-panel .f-bottom { padding-top: 6px; }
+.c-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.c-card {
+  background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 16px;
+  cursor: pointer; display: flex; flex-direction: column; transition: transform .18s, box-shadow .18s, border-color .18s;
+}
+.c-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); border-color: #c7cbd4; }
+.cc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.cc-id { font-size: 13.5px; font-weight: 650; word-break: break-all; line-height: 1.45; }
+.cc-new { flex: none; font-size: 11px; font-weight: 600; color: #e5484d; padding-top: 2px; }
+.cc-vendor { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+.cc-vendor .avatar { width: 22px; height: 22px; border-radius: 6px; font-size: 11px; }
+.cc-vendor .v-name { font-size: 12.5px; color: var(--text-2); }
+.cc-desc {
+  font-size: 12.5px; color: var(--text-2); line-height: 1.6; margin-top: 10px; height: 40px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.cc-tags {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 12px;
+  border-top: 1px dashed var(--border); min-height: 40px; align-content: flex-start;
+}
+.cc-tags .t { font-size: 11.5px; padding: 2px 8px; border-radius: 6px; background: #f3f4f7; color: var(--text-2); white-space: nowrap; }
+.t-type { background: var(--primary-bg) !important; color: var(--primary) !important; font-weight: 500; }
+.t-free { background: var(--green-bg) !important; color: var(--green) !important; font-weight: 500; }
+@media (max-width: 1320px) { .c-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 1024px) { .c-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 900px) { .c-side { display: none; } }
+@media (max-width: 640px) { .c-grid { grid-template-columns: 1fr; } }
+
+/* ---------- Footer ---------- */
+.footer { background: #101218; color: #8a90a0; margin-top: 0; }
+.footer-inner { max-width: 1280px; margin: 0 auto; padding: 40px 24px 24px; }
+.footer-cols { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 24px; }
+.footer .f-brand { color: #fff; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.footer .f-slogan { margin-top: 10px; font-size: 12.5px; line-height: 1.7; max-width: 260px; }
+.footer h5 { color: #fff; font-size: 13px; margin-bottom: 12px; font-weight: 600; }
+.footer ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.footer ul a { font-size: 12.5px; }
+.footer ul a:hover { color: #fff; }
+.footer-bottom { border-top: 1px solid #23262f; margin-top: 28px; padding-top: 16px; font-size: 12px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+
+/* ---------- Toast / 响应式 ---------- */
+.toast {
+  position: fixed; left: 50%; bottom: 40px; transform: translateX(-50%); z-index: 999;
+  background: rgba(16, 18, 24, .92); color: #fff; font-size: 13px;
+  padding: 9px 18px; border-radius: 10px; box-shadow: var(--shadow-2); animation: toast-in .2s;
+}
+@keyframes toast-in { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@media (max-width: 1080px) {
+  .cards-grid { grid-template-columns: repeat(2, 1fr); }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .detail-cols { grid-template-columns: 1fr; }
+  .detail-aside { position: static; }
+  .footer-cols { grid-template-columns: repeat(2, 1fr); }
+  .value-strip { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 720px) {
+  .nav-links { display: none; }
+  .hero h1 { font-size: 28px; }
+  .hero { padding: 48px 20px 44px; }
+  .cards-grid { grid-template-columns: 1fr; }
+  .f-row { flex-direction: column; gap: 6px; }
+  .f-label { width: auto; padding-top: 0; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+  .detail-head { flex-direction: column; }
+  .dh-actions { width: 100%; }
+}
+
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="logo" href="#">
+      <span class="logo-mark"></span>KerAPI
+    </a>
+    <nav class="nav-links">
+      <a href="#">主页</a>
+      <a href="#" class="active">模型广场</a>
+      <a href="../kerminal_work/docs.html#/introduction">文档</a>
+    </nav>
+    <div class="topbar-actions">
+      <a class="btn-pill" href="#" id="navConsole">控制台</a>
+    </div>
+  </div>
+</header>
+
+<main id="listView">
+  <section class="hero">
+    <canvas class="hero-canvas" id="heroCanvas" aria-hidden="true"></canvas>
+    <div class="hero-inner">
+      <span class="badge-pill">统一模型网关</span>
+      <h1>模型随心换，<span class="grad">一接稳到底</span></h1>
+      <p class="sub">换模型不改代码，渠道故障自动切换</p>
+      <div class="search-box">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="searchInput" type="text" placeholder="搜索模型名称 / 系列 / 能力">
+        <button class="btn btn-primary btn-sm">搜索</button>
+      </div>
+      <div class="hot-row">
+        <span class="lbl">热门模型：</span>
+        <a class="hot-chip" data-q="DeepSeek">DeepSeek-V4</a>
+        <a class="hot-chip" data-q="Qwen">Qwen3-VL</a>
+        <a class="hot-chip" data-q="GLM">GLM-5.2</a>
+        <a class="hot-chip" data-q="Kimi">Kimi-K2.6</a>
+        <a class="hot-chip" data-q="Hunyuan">Hunyuan-Video</a>
+        <a class="hot-chip" data-q="免费">免费模型</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="value-strip">
+    <div class="vs-item"><b>100+</b><span>主流模型持续上新</span></div>
+    <div class="vs-item"><b>随心换</b><span>换模型不改代码，即换即用</span></div>
+    <div class="vs-item"><b>稳到底</b><span>多渠道路由，故障自动切换</span></div>
+    <div class="vs-item"><b>按量计费</b><span>用多少付多少，透明无底消</span></div>
+  </section>
+
+  <section class="filterbar">
+    <div class="filter-inner">
+      <div class="f-row">
+        <span class="f-label">模型类型</span>
+        <div class="f-opts type-opts"></div>
+      </div>
+      <div class="f-divider"></div>
+      <div class="f-row">
+        <span class="f-label">系列</span>
+        <div class="f-opts series-opts"></div>
+      </div>
+      <div class="f-divider"></div>
+      <div class="f-row">
+        <span class="f-label">能力标签</span>
+        <div class="f-opts cap-opts"></div>
+      </div>
+      <div class="f-divider"></div>
+      <div class="f-bottom">
+        <span class="result-count" id="resultCount"></span>
+        <div class="f-tools">
+          <span class="tool-lbl">排序</span>
+          <select class="sort-select">
+            <option value="default">默认（热度）</option>
+            <option value="price-asc">价格从低到高</option>
+            <option value="price-desc">价格从高到低</option>
+            <option value="ctx-desc">上下文长度</option>
+            <option value="released-desc">最新发布</option>
+          </select>
+          <span class="tool-lbl">价格等级</span>
+          <div class="seg level-seg"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cards-wrap">
+    <div class="cards-grid" id="cardsGrid"></div>
+    <div class="empty-state" id="emptyState" hidden>
+      <div class="t">没有找到符合条件的模型</div>
+      <div>试试更换关键词或清除筛选条件</div>
+    </div>
+  </section>
+</main>
+
+<main class="console" id="consoleView" hidden>
+  <aside class="c-side">
+    <a class="c-logo" href="#" id="cHome"><span class="logo-mark"></span>KerAPI</a>
+    <div class="c-group">模型业务</div>
+    <nav class="c-nav">
+      <a class="active" href="#">模型广场</a>
+      <a href="#">模型调用监控</a>
+    </nav>
+    <div class="c-group">体验中心</div>
+    <nav class="c-nav">
+      <a href="#">在线对话</a>
+      <a href="#">图像生成</a>
+      <a href="#">视频生成</a>
+      <a href="#">语音合成</a>
+    </nav>
+    <div class="c-group">管理</div>
+    <nav class="c-nav">
+      <a href="#">API Key 管理</a>
+      <a href="#">余额充值</a>
+      <a href="#">使用日志</a>
+      <a href="#">账单中心</a>
+      <a href="#">发票管理</a>
+    </nav>
+    <div class="c-group">支持</div>
+    <nav class="c-nav">
+      <a href="../kerminal_work/docs.html#/apikey-guide">文档中心<span class="ext">↗</span></a>
+      <a href="#">通知公告</a>
+      <a href="#">工单反馈</a>
+    </nav>
+    <div class="c-group">账户</div>
+    <nav class="c-nav">
+      <a href="#">个人资料</a>
+      <a href="#">实名认证</a>
+    </nav>
+    <div class="c-user">
+      <div class="u-ava">K</div>
+      <div>
+        <div class="u-name">KerAPI 用户</div>
+        <div class="u-sub">未认证 · 去认证</div>
+      </div>
+    </div>
+  </aside>
+  <section class="c-main">
+    <div class="c-top"><span class="burger">☰</span><span class="t">模型广场</span></div>
+    <div class="c-body">
+      <div class="c-toolbar">
+        <button class="c-filter-toggle" id="cFilterToggle">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2.5"/><circle cx="8" cy="17" r="2.5"/></svg>
+          展开筛选器
+        </button>
+        <div class="c-search">
+          <input id="cSearchInput" type="text" placeholder="请输入模型名称">
+          <button class="s-btn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+        </div>
+        <span class="c-count" id="cCount"></span>
+      </div>
+      <div class="c-filter-panel" id="cFilterPanel" hidden>
+        <div class="f-row">
+          <span class="f-label">模型类型</span>
+          <div class="f-opts type-opts"></div>
+        </div>
+        <div class="f-row">
+          <span class="f-label">系列</span>
+          <div class="f-opts series-opts"></div>
+        </div>
+        <div class="f-row">
+          <span class="f-label">能力标签</span>
+          <div class="f-opts cap-opts"></div>
+        </div>
+        <div class="f-bottom">
+          <span class="result-count" id="cResultCount"></span>
+          <div class="f-tools">
+            <span class="tool-lbl">排序</span>
+            <select class="sort-select">
+              <option value="default">默认（热度）</option>
+              <option value="price-asc">价格从低到高</option>
+              <option value="price-desc">价格从高到低</option>
+              <option value="ctx-desc">上下文长度</option>
+              <option value="released-desc">最新发布</option>
+            </select>
+            <span class="tool-lbl">价格等级</span>
+            <div class="seg level-seg"></div>
+          </div>
+        </div>
+      </div>
+      <div class="c-grid" id="cGrid"></div>
+      <div class="empty-state" id="cEmpty" hidden>
+        <div class="t">没有找到符合条件的模型</div>
+        <div>试试更换关键词或清除筛选条件</div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="drawer-mask" id="detailMask"></div>
+<aside class="drawer" id="detailView" aria-hidden="true">
+  <div class="drawer-bar">
+    <span class="d-title" id="drawerTitle">模型详情</span>
+    <span class="d-sub" id="drawerSub"></span>
+    <button class="drawer-close" id="drawerClose" title="关闭（Esc）">✕</button>
+  </div>
+  <div class="drawer-body">
+    <div class="detail-wrap" id="detailBody"></div>
+  </div>
+</aside>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-cols">
+      <div>
+        <div class="f-brand"><span class="logo-mark"></span>KerAPI</div>
+        <p class="f-slogan">模型随心换，一接稳到底。KerAPI 统一接入主流大模型——换型不改代码，故障自动切换。</p>
+      </div>
+      <div>
+        <h5>产品</h5>
+        <ul>
+          <li><a href="#">模型广场</a></li>
+          <li><a href="#">价格</a></li>
+          <li><a href="#">在线体验</a></li>
+          <li><a href="#">控制台</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>开发者</h5>
+        <ul>
+          <li><a href="../kerminal_work/docs.html#/apikey-guide">文档中心</a></li>
+          <li><a href="../kerminal_work/docs.html#/quickstart">快速开始</a></li>
+          <li><a href="../kerminal_work/docs.html#/api-chat">API Reference</a></li>
+          <li><a href="../kerminal_work/docs.html#/error-code">错误码说明</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>支持</h5>
+        <ul>
+          <li><a href="#">工单反馈</a></li>
+          <li><a href="#">通知公告</a></li>
+          <li><a href="#">服务状态</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>公司</h5>
+        <ul>
+          <li><a href="#">关于我们</a></li>
+          <li><a href="#">合规与隐私</a></li>
+          <li><a href="#">商务合作</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 KerAPI</span>
+      <span>模型随心换，一接稳到底</span>
+    </div>
+  </div>
+</footer>
+
+<div id="toast" class="toast" hidden></div>
+
+<script>
+'use strict';
+
+/* ===== 价格等级（第一版折扣 = 渠道基础折扣）===== */
+const LEVELS = [
+  { key: 'std', label: '标准价', factor: 1 },
+  { key: 'lv1', label: 'Lv.1', factor: 0.95 },
+  { key: 'lv2', label: 'Lv.2', factor: 0.90 },
+  { key: 'lv3', label: 'Lv.3', factor: 0.85 },
+];
+
+const VENDORS = {
+  'deepseek-ai': { name: '深度求索', color: '#4d6bfe' },
+  'qwen':        { name: '阿里通义', color: '#615ced' },
+  'zai-org':     { name: '智谱 AI', color: '#3859ff' },
+  'moonshotai':  { name: '月之暗面', color: '#16191e' },
+  'minimaxi':    { name: 'MiniMax', color: '#e8590c' },
+  'tencent':     { name: '腾讯混元', color: '#0052d9' },
+  'kuaishou':    { name: '快手可灵', color: '#ff4d17' },
+  'fishaudio':   { name: 'Fish Audio', color: '#0ea5a4' },
+  'baai':        { name: '智源研究院', color: '#2563eb' },
+};
+
+const SERIES = {
+  'deepseek-ai': 'DeepSeek',
+  'qwen':        'Qwen',
+  'zai-org':     '智谱',
+  'moonshotai':  'Kimi',
+  'minimaxi':    'MiniMax',
+  'tencent':     '混元',
+  'kuaishou':    '可灵',
+  'fishaudio':   'Fish Audio',
+  'baai':        '智源',
+};
+
+const TYPES = [
+  { key: 'all', label: '全部' },
+  { key: 'chat', label: '对话' },
+  { key: 'image', label: '生图' },
+  { key: 'video', label: '视频' },
+  { key: 'audio', label: '语音' },
+  { key: 'embedding', label: '嵌入' },
+  { key: 'rerank', label: '重排序' },
+];
+
+const CAP_CHIPS = ['免费', 'Pro', '推理', '视觉', '工具调用', 'Coder', '长上下文'];
+
+/* ===== 模型数据（全部 mock）=====
+   billing: [计费项, 标准单价, 单位]；渠道为 [名称, 相对标准价的倍率] */
+const MODELS = [
+  {
+    id: 'deepseek-ai/DeepSeek-V4-Flash', name: 'DeepSeek-V4-Flash', vendor: 'deepseek-ai',
+    type: 'chat', free: false, pro: false, hot: true, status: '稳定', released: '2026-04-24',
+    desc: 'DeepSeek-V4 系列轻量旗舰 MoE 模型，总参数 284B / 激活 13B，支持 1M 超长上下文与 384K 最大输出，Agent 与代码任务性价比首选。',
+    caps: ['工具调用', '推理', '长上下文', '结构化输出'],
+    rpm: 1000, tpm: 4000000, ctxK: 1024,
+    billing: [['模型输入', 1, 'M Tokens'], ['模型输出', 2, 'M Tokens'], ['缓存输入', 0.1, 'M Tokens', '0.1×']],
+    channels: [['官方直连', 1], ['火山引擎', 0.94]],
+    specs: [['上下文长度', '1024K tokens'], ['最大输出', '384K tokens'], ['输入类型', '文本'], ['输出类型', '文本'], ['参数量', '284B（激活 13B）'], ['收费类型', '按 Token 计费']],
+    apis: { chat: true, responses: true },
+    foot: [['上下文', '1024K'], ['参数', '284B']],
+  },
+  {
+    id: 'deepseek-ai/DeepSeek-V4-Pro', name: 'DeepSeek-V4-Pro', vendor: 'deepseek-ai',
+    type: 'chat', free: false, pro: true, hot: true, status: '稳定', released: '2026-03-02',
+    desc: 'DeepSeek-V4 系列满血旗舰，复杂推理、数学与长程 Agent 任务表现最强，原生支持 Responses API 与工具调用。',
+    caps: ['工具调用', '推理', '长上下文', '结构化输出'],
+    rpm: 600, tpm: 2000000, ctxK: 1024,
+    billing: [['模型输入', 6, 'M Tokens'], ['模型输出', 28, 'M Tokens'], ['缓存输入', 0.6, 'M Tokens', '0.1×']],
+    channels: [['官方直连', 1], ['火山引擎', 0.94]],
+    specs: [['上下文长度', '1024K tokens'], ['最大输出', '128K tokens'], ['输入类型', '文本'], ['输出类型', '文本'], ['参数量', '770B（激活 49B）'], ['收费类型', '按 Token 计费']],
+    apis: { chat: true, responses: true },
+    foot: [['上下文', '1024K'], ['参数', '770B']],
+  },
+  {
+    id: 'zai-org/GLM-5.2', name: 'GLM-5.2', vendor: 'zai-org',
+    type: 'chat', free: false, pro: true, hot: true, status: '稳定', released: '2026-06-17',
+    desc: '智谱旗舰模型，面向长程任务深度优化，稳定支持 1M token 上下文，编程与 Vibe Coding 场景表现出色，支持多档思考强度。',
+    caps: ['工具调用', '推理', '长上下文', 'Coder'],
+    rpm: 600, tpm: 2000000, ctxK: 1024,
+    billing: [['模型输入', 6, 'M Tokens'], ['模型输出', 28, 'M Tokens'], ['缓存输入', 0.6, 'M Tokens', '0.1×']],
+    channels: [['官方直连', 1], ['智谱开放平台', 0.93]],
+    specs: [['上下文长度', '1024K tokens'], ['最大输出', '128K tokens'], ['输入类型', '文本'], ['输出类型', '文本'], ['参数量', '753B（激活 40B）'], ['收费类型', '按 Token 计费']],
+    apis: { chat: true, responses: true },
+    foot: [['上下文', '1024K'], ['参数', '753B']],
+  },
+  {
+    id: 'zai-org/GLM-4.5-Flash', name: 'GLM-4.5-Flash', vendor: 'zai-org',
+    type: 'chat', free: true, pro: false, hot: false, status: '稳定', released: '2026-01-20',
+    desc: '免费模型：轻量高速，适合对话、翻译、摘要与批量清洗等日常任务，新用户零成本上手。',
+    caps: ['工具调用', '长上下文'],
+    rpm: 200, tpm: 500000, ctxK: 128,
+    billing: [['模型输入', 0, 'M Tokens'], ['模型输出', 0, 'M Tokens']],
+    channels: [['官方直连', 1]],
+    specs: [['上下文长度', '128K tokens'], ['最大输出', '32K tokens'], ['输入类型', '文本'], ['输出类型', '文本'], ['参数量', '—'], ['收费类型', '限时免费']],
+    apis: { chat: true },
+    foot: [['上下文', '128K'], ['免费', '¥0']],
+  },
+  {
+    id: 'moonshotai/Kimi-K2.6', name: 'Kimi-K2.6', vendor: 'moonshotai',
+    type: 'chat', free: false, pro: false, hot: true, status: '稳定', released: '2026-05-09',
+    desc: '月之暗面 Agentic 旗舰，1T 参数 MoE 架构，多步工具调用与长程代码任务能力强，思考 token 消耗低。',
+    caps: ['工具调用', 'Coder', '长上下文'],
+    rpm: 500, tpm: 2000000, ctxK: 256,
+    billing: [['模型输入', 4, 'M Tokens'], ['模型输出', 16, 'M Tokens'], ['缓存输入', 0.4, 'M Tokens', '0.1×']],
+    channels: [['官方直连', 1], ['火山引擎', 0.96]],
+    specs: [['上下文长度', '256K tokens'], ['最大输出', '64K tokens'], ['输入类型', '文本'], ['输出类型', '文本'], ['参数量', '1T（激活 32B）'], ['收费类型', '按 Token 计费']],
+    apis: { chat: true, responses: true },
+    foot: [['上下文', '256K'], ['参数', '1T']],
+  },
+  {
+    id: 'qwen/qwen3-vl-32b-instruct', name: 'Qwen3-VL-32B-Instruct', vendor: 'qwen',
+    type: 'chat', free: false, pro: false, hot: true, status: '稳定', released: '2026-02-28',
+    desc: '通义视觉语言模型，支持图像 / 视频输入理解、文档解析与 GUI Agent 操作，多模态性价比之选。',
+    caps: ['视觉', '工具调用', '长上下文'],
+    rpm: 800, tpm: 3000000, ctxK: 256,
+    billing: [['模型输入', 2, 'M Tokens'], ['模型输出', 6, 'M Tokens'], ['缓存输入', 0.2, 'M Tokens', '0.1×']],
+    channels: [['官方直连', 1], ['阿里百炼', 0.92]],
+    specs: [['上下文长度', '256K tokens'], ['最大输出', '64K tokens'], ['输入类型', '文本 / 图像 / 视频'], ['输出类型', '文本'], ['参数量', '32B'], ['收费类型', '按 Token 计费']],
+    apis: { chat: true },
+    foot: [['上下文', '256K'], ['参数', '32B']],
+  },
+  {
+    id: 'qwen/qwen3-8b', name: 'Qwen3-8B', vendor: 'qwen',
+    type: 'chat', free: true, pro: false, hot: false, status: '稳定', released: '2025-12-11',
+    desc: '免费模型：小参数量通用模型，响应快、成本低，适合高并发轻量对话与分类打标。',
+    caps: ['工具调用'],
+    rpm: 300, tpm: 500000, ctxK: 128,
+    billing: [['模型输入', 0, 'M Tokens'], ['模型输出', 0, 'M Tokens']],
+    channels: [['官方直连', 1]],
+    specs: [['上下文长度', '128K tokens'], ['最大输出', '32K tokens'], ['输入类型', '文本'], ['输出类型', '文本'], ['参数量', '8B'], ['收费类型', '限时免费']],
+    apis: { chat: true },
+    foot: [['上下文', '128K'], ['免费', '¥0']],
+  },
+  {
+    id: 'minimaxi/MiniMax-M2.5', name: 'MiniMax-M2.5', vendor: 'minimaxi',
+    type: 'chat', free: false, pro: false, hot: false, status: '稳定', released: '2026-07-15',
+    desc: 'MiniMax 最新旗舰，综合能力强、输出风格自然，写作、角色扮演与多语言场景表现突出。',
+    caps: ['工具调用', '推理', '长上下文'],
+    rpm: 500, tpm: 2000000, ctxK: 512,
+    billing: [['模型输入', 3, 'M Tokens'], ['模型输出', 12, 'M Tokens'], ['缓存输入', 0.3, 'M Tokens', '0.1×']],
+    channels: [['官方直连', 1], ['火山引擎', 0.95]],
+    specs: [['上下文长度', '512K tokens'], ['最大输出', '64K tokens'], ['输入类型', '文本'], ['输出类型', '文本'], ['参数量', '—'], ['收费类型', '按 Token 计费']],
+    apis: { chat: true, responses: true },
+    foot: [['上下文', '512K'], ['厂商', 'MiniMax']],
+  },
+  {
+    id: 'zai-org/z-image-2', name: 'Z-Image-2', vendor: 'zai-org',
+    type: 'image', free: false, pro: false, hot: false, status: '稳定', released: '2026-08-05',
+    desc: '新一代文生图模型，中文语义理解准确，支持 2K 分辨率与多参考图编辑，海报与电商素材生成首选。',
+    caps: ['视觉'],
+    rpm: 60, tpm: null, ctxK: null,
+    billing: [['图像生成（1024×1024）', 0.35, '张'], ['图像生成（2048×2048）', 1.3, '张', '3.7×'], ['图像编辑', 0.5, '张', '1.4×']],
+    channels: [['官方直连', 1]],
+    specs: [['最大分辨率', '2048×2048'], ['输入类型', '文本 / 参考图'], ['输出类型', '图像'], ['单次生成张数', '1 - 4 张'], ['收费类型', '按次计费']],
+    apis: { images: true },
+    foot: [['分辨率', '2K'], ['计费', '¥0.35/张']],
+  },
+  {
+    id: 'tencent/Hunyuan-Video-2', name: 'Hunyuan-Video-2', vendor: 'tencent',
+    type: 'video', free: false, pro: true, hot: false, status: '预览', released: '2026-08-28',
+    desc: '腾讯混元新一代视频生成模型，支持文生视频 / 图生视频，1080P 与 5s / 10s 时长，运动一致性大幅提升。',
+    caps: [],
+    rpm: 10, tpm: null, ctxK: null,
+    billing: [['视频生成（1080P · 5s）', 12, '次'], ['视频生成（1080P · 10s）', 22, '次', '1.8×']],
+    channels: [['官方直连', 1]],
+    specs: [['最大分辨率', '1920×1080'], ['视频时长', '5s / 10s'], ['输入类型', '文本 / 首帧图'], ['输出类型', '视频'], ['收费类型', '按次计费']],
+    apis: { video: true },
+    foot: [['时长', '5s / 10s'], ['厂商', '混元']],
+  },
+  {
+    id: 'kuaishou/kling-video-2.5', name: 'Kling-Video-2.5', vendor: 'kuaishou',
+    type: 'video', free: false, pro: false, hot: false, status: '稳定', released: '2026-07-01',
+    desc: '可灵 2.5 视频生成模型，电影级画面质感与镜头控制能力，支持运镜指令与首尾帧控制。',
+    caps: [],
+    rpm: 10, tpm: null, ctxK: null,
+    billing: [['视频生成（1080P · 5s）', 15, '次'], ['视频生成（1080P · 10s）', 28, '次', '1.9×']],
+    channels: [['官方直连', 1]],
+    specs: [['最大分辨率', '1920×1080'], ['视频时长', '5s / 10s'], ['输入类型', '文本 / 图像'], ['输出类型', '视频'], ['收费类型', '按次计费']],
+    apis: { video: true },
+    foot: [['时长', '5s / 10s'], ['厂商', '可灵']],
+  },
+  {
+    id: 'fishaudio/fish-speech-2', name: 'Fish-Speech-2', vendor: 'fishaudio',
+    type: 'audio', free: false, pro: false, hot: false, status: '稳定', released: '2026-04-10',
+    desc: '高保真语音合成模型，10 秒参考音频即可克隆音色，支持中英日多语言与情感控制。',
+    caps: [],
+    rpm: 100, tpm: null, ctxK: null,
+    billing: [['语音合成', 1.5, '万字符'], ['音色克隆（一次性）', 5, '个音色']],
+    channels: [['官方直连', 1]],
+    specs: [['支持语言', '中 / 英 / 日 等 13 种'], ['输入类型', '文本 / 参考音频'], ['输出类型', '音频'], ['采样率', '44.1kHz'], ['收费类型', '按字符计费']],
+    apis: { audio: true },
+    foot: [['音色克隆', '支持'], ['计费', '¥1.5/万字']],
+  },
+  {
+    id: 'baai/bge-m3', name: 'BGE-M3', vendor: 'baai',
+    type: 'embedding', free: true, pro: false, hot: false, status: '稳定', released: '2025-11-08',
+    desc: '免费模型：智源开源多语言嵌入模型，支持 8192 长文本，稠密 / 稀疏 / 多向量三模式，RAG 检索标配。',
+    caps: ['长上下文'],
+    rpm: 500, tpm: 2000000, ctxK: 8,
+    billing: [['模型输入', 0, 'M Tokens']],
+    channels: [['官方直连', 1]],
+    specs: [['向量维度', '1024'], ['最大输入', '8192 tokens'], ['输入类型', '文本'], ['输出类型', '向量'], ['收费类型', '限时免费']],
+    apis: { embeddings: true },
+    foot: [['维度', '1024'], ['免费', '¥0']],
+  },
+  {
+    id: 'qwen/qwen3-reranker-8b', name: 'Qwen3-Reranker-8B', vendor: 'qwen',
+    type: 'rerank', free: false, pro: false, hot: false, status: '稳定', released: '2026-01-15',
+    desc: '通义重排序模型，对召回结果精排，显著提升 RAG 答案准确率，与 BGE-M3 组成检索黄金搭档。',
+    caps: [],
+    rpm: 300, tpm: 1000000, ctxK: 32,
+    billing: [['模型输入', 0.5, 'M Tokens']],
+    channels: [['官方直连', 1], ['阿里百炼', 0.92]],
+    specs: [['最大输入', '32K tokens'], ['输入类型', '查询 + 文档列表'], ['输出类型', '相关性分数'], ['参数量', '8B'], ['收费类型', '按 Token 计费']],
+    apis: { rerank: true },
+    foot: [['最大输入', '32K'], ['厂商', '通义']],
+  },
+];
+
+/* ===== 列表页状态与渲染 ===== */
+const state = { type: 'all', series: 'all', caps: new Set(), q: '', sort: 'default', level: 'std' };
+const $ = (sel) => document.querySelector(sel);
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const fmtNum = (n) => n >= 1000000 ? (n / 1000000).toFixed(n % 1000000 ? 1 : 0) + 'M' : n >= 1000 ? (n / 1000).toFixed(n % 1000 ? 1 : 0) + 'K' : String(n);
+const levelFactor = () => LEVELS.find((l) => l.key === state.level).factor;
+
+function priceText(m, lvKey) {
+  if (m.free) return '<span class="free-tag">免费</span>';
+  const factor = LEVELS.find((l) => l.key === (lvKey || state.level)).factor;
+  if (m.type === 'chat' || m.type === 'embedding' || m.type === 'rerank') {
+    const f = (v) => '¥' + (Math.round(v * factor * 100) / 100).toString().replace(/\.?0+$/, '');
+    return `输入 ${f(m.billing[0][1])} / 输出 ${f(m.billing[1] ? m.billing[1][1] : m.billing[0][1])} <span class="unit">/ M Tokens</span>`;
+  }
+  const first = m.billing[0];
+  return '¥' + (Math.round(first[1] * factor * 100) / 100) + ` <span class="unit">/ ${first[2]}</span>`;
+}
+
+const isNew = (m) => Date.now() - new Date(m.released).getTime() < 90 * 86400000;
+
+function matchModel(m) {
+  if (state.type !== 'all' && m.type !== state.type) return false;
+  if (state.series !== 'all' && (SERIES[m.vendor] || '其他') !== state.series) return false;
+  for (const cap of state.caps) {
+    if (cap === '免费' && !m.free) return false;
+    if (cap === 'Pro' && !m.pro) return false;
+    if (cap === '视觉' && !m.caps.includes('视觉')) return false;
+    if (!['免费', 'Pro', '视觉'].includes(cap) && !m.caps.includes(cap)) return false;
+  }
+  if (state.q) {
+    const hay = `${m.id} ${m.name} ${VENDORS[m.vendor].name} ${m.desc} ${m.caps.join(' ')} ${m.free ? '免费' : ''}`.toLowerCase();
+    if (!hay.includes(state.q.toLowerCase())) return false;
+  }
+  return true;
+}
+
+function sortModels(list) {
+  const priceOf = (m) => m.free ? 0 : (m.billing[0][1] + (m.billing[1] ? m.billing[1][1] : 0));
+  const arr = [...list];
+  if (state.sort === 'price-asc') arr.sort((a, b) => priceOf(a) - priceOf(b));
+  else if (state.sort === 'price-desc') arr.sort((a, b) => priceOf(b) - priceOf(a));
+  else if (state.sort === 'ctx-desc') arr.sort((a, b) => (b.ctxK || 0) - (a.ctxK || 0));
+  else if (state.sort === 'released-desc') arr.sort((a, b) => b.released.localeCompare(a.released));
+  else arr.sort((a, b) => (b.hot ? 1 : 0) - (a.hot ? 1 : 0) || b.released.localeCompare(a.released));
+  return arr;
+}
+
+function cardHTML(m) {
+  const v = VENDORS[m.vendor];
+  const caps = m.caps.length ? m.caps.slice(0, 4).map((c) => `<span class="cap">${c}</span>`).join('') + (m.caps.length > 4 ? `<span class="cap">+${m.caps.length - 4}</span>` : '') : '';
+  return `
+  <article class="card" data-id="${esc(m.id)}">
+    <div class="card-head">
+      <div class="avatar" style="background:${v.color}">${esc(m.name[0])}</div>
+      <div class="card-titles">
+        <div class="card-name"><span class="nm">${esc(m.name)}</span>${m.free ? '<span class="free-dot">免费</span>' : ''}${m.pro ? '<span class="badge b-pro">Pro</span>' : ''}</div>
+        <div class="model-id">${esc(m.id)}</div>
+      </div>
+      <span class="badge b-type-${m.type}">${TYPES.find((t) => t.key === m.type).label}</span>
+    </div>
+    <p class="card-desc">${esc(m.desc)}</p>
+    <div class="cap-row">${caps}</div>
+    <div class="card-metrics">
+      <div class="metric"><div class="m-lbl">价格${state.level !== 'std' ? `（${LEVELS.find((l) => l.key === state.level).label} 折后）` : ''}</div><div class="m-val price">${priceText(m)}</div></div>
+    </div>
+    <div class="card-foot">
+      <span>${m.foot.map(([k, val]) => `${k} ${val}`).join(' · ')}</span>
+      <span class="go-detail">查看详情 →</span>
+    </div>
+  </article>`;
+}
+
+function cCardHTML(m) {
+  const v = VENDORS[m.vendor];
+  const typeName = TYPES.find((t) => t.key === m.type).label;
+  const tags = [
+    `<span class="t t-type">${typeName}</span>`,
+    m.free ? '<span class="t t-free">免费</span>' : '',
+    ...m.caps.map((c) => `<span class="t">${esc(c)}</span>`),
+    `<span class="t">${esc(m.foot[0][1])}</span>`,
+  ];
+  return `
+  <article class="c-card" data-id="${esc(m.id)}">
+    <div class="cc-top"><div class="cc-id">${esc(m.id)}</div>${isNew(m) ? '<span class="cc-new">New</span>' : ''}</div>
+    <div class="cc-vendor"><div class="avatar" style="background:${v.color}">${esc(m.name[0])}</div><span class="v-name">${esc(v.name)}</span></div>
+    <p class="cc-desc">${esc(m.desc)}</p>
+    <div class="cc-tags">${tags.join('')}</div>
+  </article>`;
+}
+
+function renderCards() {
+  const list = sortModels(MODELS.filter(matchModel));
+  $('#cardsGrid').innerHTML = list.map(cardHTML).join('');
+  $('#cGrid').innerHTML = list.map(cCardHTML).join('');
+  $('#emptyState').hidden = list.length > 0;
+  $('#cEmpty').hidden = list.length > 0;
+  const countTxt = `共 <b>${list.length}</b> 个模型`;
+  $('#resultCount').innerHTML = countTxt;
+  $('#cResultCount').innerHTML = countTxt;
+  $('#cCount').innerHTML = countTxt;
+}
+
+function renderFilterBar() {
+  const typeHTML = TYPES.map((t) =>
+    `<button class="f-opt ${state.type === t.key ? 'active' : ''}" data-type="${t.key}">${t.label}</button>`
+  ).join('');
+  const seriesHTML = `<button class="f-opt ${state.series === 'all' ? 'active' : ''}" data-series="all">全部</button>` +
+    Object.values(SERIES).map((s) => `<button class="f-opt ${state.series === s ? 'active' : ''}" data-series="${s}">${s}</button>`).join('');
+  const capHTML = CAP_CHIPS.map((c) => `<button class="f-opt ${state.caps.has(c) ? 'active' : ''}" data-cap="${c}">${c}</button>`).join('');
+  const segHTML = LEVELS.map((l) => `<button class="${state.level === l.key ? 'active' : ''}" data-level="${l.key}">${l.label}</button>`).join('');
+  document.querySelectorAll('.type-opts').forEach((el) => el.innerHTML = typeHTML);
+  document.querySelectorAll('.series-opts').forEach((el) => el.innerHTML = seriesHTML);
+  document.querySelectorAll('.cap-opts').forEach((el) => el.innerHTML = capHTML);
+  document.querySelectorAll('.level-seg').forEach((el) => el.innerHTML = segHTML);
+}
+
+function showConsole() {
+  closeDetail();
+  $('#listView').hidden = true; $('#consoleView').hidden = false;
+  document.querySelector('.topbar').hidden = true;
+  document.querySelector('.footer').hidden = true;
+  window.scrollTo({ top: 0 });
+}
+
+function showList() {
+  closeDetail();
+  $('#consoleView').hidden = true; $('#listView').hidden = false;
+  document.querySelector('.topbar').hidden = false;
+  document.querySelector('.footer').hidden = false;
+  window.scrollTo({ top: 0 });
+}
+
+function syncDetailLevel() {
+  if (!drawerOpen() || !currentModel) return;
+  document.querySelectorAll('#detailLevelSeg button').forEach((x) => x.classList.toggle('active', x.dataset.level === state.level));
+  $('#detailLevelSeg').closest('.panel').querySelector('.price-table').outerHTML = priceTableHTML(currentModel);
+}
+
+function bindListEvents() {
+  document.addEventListener('click', (e) => {
+    const typeB = e.target.closest('[data-type]');
+    if (typeB) { state.type = typeB.dataset.type; renderFilterBar(); renderCards(); return; }
+    const seriesB = e.target.closest('[data-series]');
+    if (seriesB) { state.series = seriesB.dataset.series; renderFilterBar(); renderCards(); return; }
+    const capB = e.target.closest('[data-cap]');
+    if (capB) {
+      state.caps.has(capB.dataset.cap) ? state.caps.delete(capB.dataset.cap) : state.caps.add(capB.dataset.cap);
+      renderFilterBar(); renderCards(); return;
+    }
+    const levelB = e.target.closest('.level-seg [data-level]');
+    if (levelB) { state.level = levelB.dataset.level; renderFilterBar(); renderCards(); syncDetailLevel(); return; }
+  });
+  document.addEventListener('change', (e) => {
+    if (e.target.classList.contains('sort-select')) {
+      state.sort = e.target.value;
+      document.querySelectorAll('.sort-select').forEach((s) => { if (s !== e.target) s.value = state.sort; });
+      renderCards();
+    }
+  });
+  $('#searchInput').addEventListener('input', (e) => { state.q = e.target.value.trim(); $('#cSearchInput').value = e.target.value; renderCards(); });
+  $('#cSearchInput').addEventListener('input', (e) => { state.q = e.target.value.trim(); $('#searchInput').value = e.target.value; renderCards(); });
+  document.querySelectorAll('.hot-chip').forEach((c) => c.addEventListener('click', () => {
+    state.q = c.dataset.q;
+    $('#searchInput').value = c.dataset.q; $('#cSearchInput').value = c.dataset.q;
+    renderCards();
+  }));
+  $('#cardsGrid').addEventListener('click', (e) => { const card = e.target.closest('.card'); if (card) openDetail(card.dataset.id); });
+  $('#cGrid').addEventListener('click', (e) => { const card = e.target.closest('.c-card'); if (card) openDetail(card.dataset.id); });
+  $('#navConsole').addEventListener('click', (e) => { e.preventDefault(); showConsole(); });
+  $('#cHome').addEventListener('click', (e) => { e.preventDefault(); showList(); });
+  $('#detailMask').addEventListener('click', closeDetail);
+  $('#drawerClose').addEventListener('click', closeDetail);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && drawerOpen()) closeDetail(); });
+  $('#cFilterToggle').addEventListener('click', () => {
+    const panel = $('#cFilterPanel'); const btn = $('#cFilterToggle');
+    panel.hidden = !panel.hidden;
+    btn.classList.toggle('open', !panel.hidden);
+    btn.lastChild.textContent = panel.hidden ? ' 展开筛选器' : ' 收起筛选器';
+  });
+}
+
+/* ===== 模型详情页 ===== */
+let currentModel = null;
+
+function priceTableHTML(m) {
+  const lvCols = LEVELS.map((l) => `<th class="${state.level === l.key ? 'cur-lv' : ''}">${l.label}${state.level === l.key ? ' ✓' : ''}</th>`).join('');
+  const rows = m.channels.map(([chName, chFactor], i) => {
+    const head = `<tr class="dim"><td colspan="5">${esc(chName)}${i === 0 ? '（默认路由）' : ''} · 渠道折扣 ${(chFactor * 10).toFixed(1).replace(/\.0$/, '')} 折</td></tr>`;
+    const body = m.billing.map(([label, base, unit, mult]) => {
+      const cells = LEVELS.map((l) => {
+        const p = Math.round(base * chFactor * l.factor * 100) / 100;
+        const txt = p === 0 ? '<span style="color:var(--green)">免费</span>' : '¥' + p.toString().replace(/\.?0+$/, '');
+        return `<td class="${state.level === l.key ? 'cur-lv' : ''}">${txt}</td>`;
+      }).join('');
+      return `<tr><td>${esc(label)}<span class="ch-sub"> / ${esc(unit)}</span>${mult ? `<span class="mult">×${esc(mult)}</span>` : ''}</td>${cells}</tr>`;
+    }).join('');
+    return head + body;
+  }).join('');
+  return `<table class="price-table"><thead><tr><th>计费项</th>${lvCols}</tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function detailHTML(m) {
+  const v = VENDORS[m.vendor];
+  const stats = [
+    ['输入价格', m.free ? '免费' : (m.type === 'chat' ? '¥' + m.billing[0][1] : '¥' + m.billing[0][1]), m.free ? '' : (m.type === 'chat' ? `/ M Tokens` : `/ ${m.billing[0][2]}`)],
+    ['输出价格', m.free ? '免费' : (m.billing[1] ? '¥' + m.billing[1][1] : '—'), m.free || !m.billing[1] ? '' : `/ M Tokens`],
+    [m.ctxK ? '上下文长度' : '关键规格', m.foot[0][1], ''],
+    ['收费类型', (m.specs.find(([k]) => k === '收费类型') || ['', '—'])[1], ''],
+  ];
+  const apiDefs = [
+    ['POST /v1/chat/completions', 'Chat Completions · 对话补全', m.apis.chat],
+    ['POST /v1/responses', 'Responses · 新版响应 API', m.apis.responses],
+    ['POST /v1/embeddings', 'Embeddings · 文本向量化', m.apis.embeddings],
+    ['POST /v1/rerank', 'Rerank · 重排序', m.apis.rerank],
+    ['POST /v1/images/generations', 'Images · 图像生成', m.apis.images],
+    ['POST /v1/videos/generations', 'Videos · 视频生成', m.apis.video],
+    ['POST /v1/audio/speech', 'Audio · 语音合成', m.apis.audio],
+  ].filter(([, , ok]) => ok !== undefined);
+  return `
+  <div class="detail-head">
+    <div class="avatar" style="background:${v.color};width:56px;height:56px;font-size:24px;border-radius:14px">${esc(m.name[0])}</div>
+    <div class="dh-info">
+      <div class="dh-top">
+        <span class="dh-name">${esc(m.name)}</span>
+        <span class="badge b-type-${m.type}">${TYPES.find((t) => t.key === m.type).label}</span>
+        ${m.free ? '<span class="badge b-free">免费</span>' : ''}${m.pro ? '<span class="badge b-pro">Pro</span>' : ''}
+        <span class="b-status ${m.status === '预览' ? 'st-preview' : ''}"><i></i>${m.status}</span>
+      </div>
+      <div class="dh-id">${esc(m.id)}<button class="copy-mini" id="copyId">复制</button></div>
+      <div class="dh-badges">${m.caps.map((c) => `<span class="cap">${c}</span>`).join('') || '<span class="cap">—</span>'}<span style="font-size:12px;color:var(--text-3)">厂商：${esc(v.name)} · 发布于 ${m.released}</span></div>
+    </div>
+    <div class="dh-actions">
+      <a class="btn btn-primary" href="#playground">⚡ 在线体验</a>
+      <a class="btn btn-ghost" href="../kerminal_work/docs.html#/api-chat">API 文档</a>
+    </div>
+  </div>
+  <div class="stats-row">${stats.map(([l, val, unit]) => `<div class="stat-card"><div class="s-lbl">${l}</div><div class="s-val">${val} <span class="unit">${unit}</span></div></div>`).join('')}</div>
+  <div class="detail-cols">
+    <div>
+      <div class="panel"><h3>📋 模型简介</h3><p style="font-size:13.5px;color:var(--text-2);line-height:1.8">${esc(m.desc)}</p></div>
+      <div class="panel"><h3>🔧 规格参数</h3>
+        <table class="spec-table">
+          ${m.specs.map(([k, val]) => `<tr><th>${k}</th><td>${esc(val)}</td></tr>`).join('')}
+          <tr><th>发布时间</th><td>${m.released}</td></tr>
+          <tr><th>模型状态</th><td>${m.status}</td></tr>
+        </table>
+      </div>
+      <div class="panel"><h3>💰 价格明细<span class="p-sub">第一版折扣 = 渠道基础折扣，随等级叠加</span></h3>
+        <div class="seg" id="detailLevelSeg" style="margin-bottom:12px">${LEVELS.map((l) => `<button class="${state.level === l.key ? 'active' : ''}" data-level="${l.key}">${l.label}</button>`).join('')}</div>
+        ${priceTableHTML(m)}
+        <div class="callout">💡 价格按所选「用户等级」高亮，等级折扣与渠道折扣叠加计算；多渠道同模型共享同一模型 ID，由平台自动路由，也可在控制台指定渠道。<br>🎖 等级权益：Lv.1 注册后自动生效，享 95 折；Lv.2 / Lv.3 按累计充值金额升级，享 9 折 / 85 折。</div>
+      </div>
+      <div class="panel"><h3>🔌 支持的 API</h3>
+        <div class="api-list">${apiDefs.map(([path, desc, ok]) => `<div class="api-item"><span class="mono">${path}</span><span style="color:var(--text-3);font-size:12px">${desc}</span><span class="${ok ? 'ok' : 'no'}">${ok ? '✓ 支持' : '✕ 不支持'}</span></div>`).join('')}</div>
+      </div>
+      <div class="panel pg-card" id="playground"><h3>⚡ 在线体验<span class="p-sub">按实际用量计费，详见价格明细</span></h3>
+        <div class="pg-head">
+          <select class="pg-model-select" id="pgModel">${MODELS.filter((x) => x.type === 'chat').map((x) => `<option value="${esc(x.id)}" ${x.id === m.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select>
+        </div>
+        <p class="pg-note">模型输出为模拟数据，正式环境将调用所选模型返回真实结果</p>
+        <div class="pg-window" id="pgWindow">
+          <div class="msg ai"><span class="m-meta">GLM-4.5-Flash（模拟）</span>你好！我是模拟的在线体验窗口。选中上方模型后输入内容，即可预览对话布局。</div>
+        </div>
+        <div class="pg-input">
+          <textarea id="pgInput" placeholder="输入消息，Enter 发送…"></textarea>
+          <button class="btn btn-primary" id="pgSend">发送</button>
+        </div>
+      </div>
+    </div>
+    <div class="detail-aside">
+      <div class="code-card">
+        <div class="code-head">
+          <div class="code-tabs" id="codeApiTabs"></div>
+          <div class="code-lang" id="codeLangTabs">
+            <button data-lang="curl" class="active">cURL</button><button data-lang="py">Python</button>
+          </div>
+          <button class="copy-btn" id="copyCode">⧉ 复制</button>
+        </div>
+        <pre id="codeBlock"></pre>
+      </div>
+      <div class="quick-links">
+        <a class="ql-item" href="../kerminal_work/docs.html#/quickstart">📄 快速开始指南<span class="arr">→</span></a>
+        <a class="ql-item" href="../kerminal_work/docs.html#/api-chat">📚 API Reference<span class="arr">→</span></a>
+        <a class="ql-item" href="../kerminal_work/docs.html#/rate-limit">🚦 错误码与限流说明<span class="arr">→</span></a>
+        <a class="ql-item" href="#">🔑 去控制台创建 API Key<span class="arr">→</span></a>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ===== 代码示例 ===== */
+const CODE = {
+  chat: {
+    label: 'Chat', build: (id, lang) => lang === 'curl'
+      ? `curl https://api.kerapi.com/v1/chat/completions \\\n  -H "Authorization: Bearer $KER_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "model": "${id}",\n    "messages": [\n      {"role": "user", "content": "你好，介绍一下你自己"}\n    ],\n    "stream": true\n  }'`
+      : `from openai import OpenAI\n\nclient = OpenAI(\n    api_key="KER_API_KEY",\n    base_url="https://api.kerapi.com/v1",\n)\n\nstream = client.chat.completions.create(\n    model="${id}",\n    messages=[{"role": "user", "content": "你好，介绍一下你自己"}],\n    stream=True,\n)\nfor chunk in stream:\n    print(chunk.choices[0].delta.content or "", end="")`,
+  },
+  responses: {
+    label: 'Responses', build: (id, lang) => lang === 'curl'
+      ? `curl https://api.kerapi.com/v1/responses \\\n  -H "Authorization: Bearer $KER_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "model": "${id}",\n    "input": "用一句话解释什么是向量数据库"\n  }'`
+      : `from openai import OpenAI\n\nclient = OpenAI(\n    api_key="KER_API_KEY",\n    base_url="https://api.kerapi.com/v1",\n)\n\nresp = client.responses.create(\n    model="${id}",\n    input="用一句话解释什么是向量数据库",\n)\nprint(resp.output_text)`,
+  },
+  images: {
+    label: '图像生成', build: (id, lang) => lang === 'curl'
+      ? `curl https://api.kerapi.com/v1/images/generations \\\n  -H "Authorization: Bearer $KER_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "model": "${id}",\n    "prompt": "一只在键盘上打字的橘猫，扁平插画风格",\n    "size": "1024x1024",\n    "n": 1\n  }'`
+      : `from openai import OpenAI\n\nclient = OpenAI(api_key="KER_API_KEY", base_url="https://api.kerapi.com/v1")\n\nimg = client.images.generate(\n    model="${id}",\n    prompt="一只在键盘上打字的橘猫，扁平插画风格",\n    size="1024x1024",\n)\nprint(img.data[0].url)`,
+  },
+  video: {
+    label: '视频生成', build: (id, lang) => lang === 'curl'
+      ? `curl https://api.kerapi.com/v1/videos/generations \\\n  -H "Authorization: Bearer $KER_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "model": "${id}",\n    "prompt": "镜头缓缓推近，晨光中的城市天际线",\n    "duration": 5,\n    "resolution": "1080p"\n  }'`
+      : `import requests\n\nresp = requests.post(\n    "https://api.kerapi.com/v1/videos/generations",\n    headers={"Authorization": "Bearer KER_API_KEY"},\n    json={\n        "model": "${id}",\n        "prompt": "镜头缓缓推近，晨光中的城市天际线",\n        "duration": 5,\n        "resolution": "1080p",\n    },\n)\nprint(resp.json()["id"])  # 异步任务，轮询查询结果`,
+  },
+  audio: {
+    label: '语音合成', build: (id, lang) => lang === 'curl'
+      ? `curl https://api.kerapi.com/v1/audio/speech \\\n  -H "Authorization: Bearer $KER_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "model": "${id}",\n    "input": "今天天气真不错，适合出去走走。",\n    "voice": "ker-female-01",\n    "response_format": "mp3"\n  }' --output speech.mp3`
+      : `from openai import OpenAI\n\nclient = OpenAI(api_key="KER_API_KEY", base_url="https://api.kerapi.com/v1")\n\nwith client.audio.speech.with_streaming_response.create(\n    model="${id}",\n    voice="ker-female-01",\n    input="今天天气真不错，适合出去走走。",\n) as resp:\n    resp.stream_to_file("speech.mp3")`,
+  },
+  embeddings: {
+    label: 'Embeddings', build: (id, lang) => lang === 'curl'
+      ? `curl https://api.kerapi.com/v1/embeddings \\\n  -H "Authorization: Bearer $KER_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "model": "${id}",\n    "input": ["向量数据库是什么", "RAG 检索增强生成"]\n  }'`
+      : `from openai import OpenAI\n\nclient = OpenAI(api_key="KER_API_KEY", base_url="https://api.kerapi.com/v1")\n\nresp = client.embeddings.create(\n    model="${id}",\n    input=["向量数据库是什么", "RAG 检索增强生成"],\n)\nprint(resp.data[0].embedding[:8])`,
+  },
+  rerank: {
+    label: '重排序', build: (id, lang) => lang === 'curl'
+      ? `curl https://api.kerapi.com/v1/rerank \\\n  -H "Authorization: Bearer $KER_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "model": "${id}",\n    "query": "什么是聚合 API 平台",\n    "documents": [\n      "聚合 API 平台统一接入多家大模型。",\n      "今天的午饭推荐是麻辣烫。"\n    ]\n  }'`
+      : `import requests\n\nresp = requests.post(\n    "https://api.kerapi.com/v1/rerank",\n    headers={"Authorization": "Bearer KER_API_KEY"},\n    json={\n        "model": "${id}",\n        "query": "什么是聚合 API 平台",\n        "documents": ["聚合 API 平台统一接入多家大模型。", "今天的午饭推荐是麻辣烫。"],\n    },\n)\nfor r in resp.json()["results"]:\n    print(r["index"], r["relevance_score"])`,
+  },
+};
+
+let codeState = { api: null, lang: 'curl' };
+
+function renderCode() {
+  const m = currentModel;
+  const apis = Object.keys(m.apis).filter((k) => CODE[k]);
+  if (!apis.includes(codeState.api)) codeState.api = apis[0];
+  $('#codeApiTabs').innerHTML = apis.map((k) => `<button class="${codeState.api === k ? 'active' : ''}" data-api="${k}">${CODE[k].label}</button>`).join('');
+  $('#codeBlock').textContent = CODE[codeState.api].build(m.id, codeState.lang);
+}
+
+/* ===== 视图切换 / 复制 / 体验 ===== */
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.hidden = false;
+  clearTimeout(t._timer); t._timer = setTimeout(() => { t.hidden = true; }, 1600);
+}
+
+function copyText(text, msg) {
+  (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject())
+    .then(() => toast(msg)).catch(() => toast('复制失败，请手动选择复制'));
+}
+
+function drawerOpen() { return $('#detailView').classList.contains('open'); }
+
+function openDetail(id) {
+  currentModel = MODELS.find((m) => m.id === id);
+  if (!currentModel) return;
+  codeState = { api: null, lang: 'curl' };
+  $('#drawerTitle').textContent = currentModel.name;
+  $('#drawerSub').textContent = currentModel.id;
+  $('#detailBody').innerHTML = detailHTML(currentModel);
+  $('#detailView').classList.add('open');
+  $('#detailView').setAttribute('aria-hidden', 'false');
+  $('#detailMask').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  $('.drawer-body').scrollTop = 0;
+  renderCode();
+  bindDetailEvents();
+}
+
+function closeDetail() {
+  if (!drawerOpen() && !$('#detailMask').classList.contains('open')) return;
+  $('#detailView').classList.remove('open');
+  $('#detailView').setAttribute('aria-hidden', 'true');
+  $('#detailMask').classList.remove('open');
+  document.body.style.overflow = '';
+  currentModel = null;
+}
+
+function bindDetailEvents() {
+  $('#copyId').addEventListener('click', () => copyText(currentModel.id, '已复制模型 ID'));
+  $('#copyCode').addEventListener('click', () => copyText($('#codeBlock').textContent, '代码已复制到剪贴板'));
+  $('#codeApiTabs').addEventListener('click', (e) => { const b = e.target.closest('[data-api]'); if (!b) return; codeState.api = b.dataset.api; renderCode(); });
+  $('#codeLangTabs').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-lang]'); if (!b) return;
+    codeState.lang = b.dataset.lang;
+    document.querySelectorAll('#codeLangTabs button').forEach((x) => x.classList.toggle('active', x.dataset.lang === codeState.lang));
+    renderCode();
+  });
+  $('#detailLevelSeg').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-level]'); if (!b) return;
+    state.level = b.dataset.level;
+    syncDetailLevel(); renderFilterBar(); renderCards();
+  });
+  const send = () => {
+    const input = $('#pgInput'); const text = input.value.trim(); if (!text) return;
+    const win = $('#pgWindow');
+    win.insertAdjacentHTML('beforeend', `<div class="msg user">${esc(text)}</div>`);
+    input.value = ''; win.scrollTop = win.scrollHeight;
+    const modelName = $('#pgModel').selectedOptions[0].text;
+    setTimeout(() => {
+      win.insertAdjacentHTML('beforeend', `<div class="msg ai"><span class="m-meta">${esc(modelName)}（模拟回复）</span>收到！这是「在线体验」模块的布局演示——正式环境中，这里会流式返回 ${esc(modelName)} 的真实输出，并按价格明细计费。</div>`);
+      win.scrollTop = win.scrollHeight;
+    }, 500);
+  };
+  $('#pgSend').addEventListener('click', send);
+  $('#pgInput').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } });
+}
+
+/* ===== Hero「百模星阵」：节点=模型，连线=统一接入，流光=调用 ===== */
+(function heroFlow() {
+  const canvas = document.getElementById('heroCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const N = window.innerWidth < 720 ? 40 : 68;
+  const LINK = 150;
+  const nodes = [];
+  const pulses = [];
+  let w = 0, h = 0, t = 0, last = 0;
+
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    w = canvas.clientWidth; h = canvas.clientHeight;
+    canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function centerFade(x, y) {
+    const dx = (x - w / 2) / (w * 0.62);
+    const dy = (y - h / 2) / (h * 0.95);
+    const d = Math.sqrt(dx * dx + dy * dy);
+    const edge = Math.max(0, Math.min(1, (d - 0.15) / 0.65));
+    return 0.3 + 0.7 * edge;
+  }
+
+  function spawnNode(p) {
+    p.x = Math.random() * w; p.y = Math.random() * h;
+    p.vx = (Math.random() - 0.5) * 0.34;
+    p.vy = (Math.random() - 0.5) * 0.28;
+    p.big = Math.random() < 0.24;
+    p.r = p.big ? 2.3 + Math.random() * 1.2 : 1.1 + Math.random() * 0.7;
+    p.tw = Math.random() * Math.PI * 2;
+    p.twS = 0.7 + Math.random() * 1.2;
+  }
+
+  function linkAlpha(a, b) {
+    const dx = a.x - b.x, dy = a.y - b.y;
+    const d = Math.sqrt(dx * dx + dy * dy);
+    if (d > LINK) return -1;
+    return (1 - d / LINK) * 0.15 * centerFade((a.x + b.x) / 2, (a.y + b.y) / 2);
+  }
+
+  function step(dt) {
+    t += dt;
+    ctx.clearRect(0, 0, w, h);
+    for (const p of nodes) {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < -12 || p.x > w + 12) p.vx *= -1;
+      if (p.y < -12 || p.y > h + 12) p.vy *= -1;
+    }
+    ctx.lineWidth = 0.9;
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const alpha = linkAlpha(nodes[i], nodes[j]);
+        if (alpha <= 0.004) continue;
+        ctx.strokeStyle = 'rgba(22,24,29,' + alpha.toFixed(3) + ')';
+        ctx.beginPath();
+        ctx.moveTo(nodes[i].x, nodes[i].y);
+        ctx.lineTo(nodes[j].x, nodes[j].y);
+        ctx.stroke();
+      }
+    }
+    if (!reduced) {
+      if (Math.random() < dt * 4 && pulses.length < 7) {
+        const a = nodes[(Math.random() * nodes.length) | 0];
+        const b = nodes[(Math.random() * nodes.length) | 0];
+        if (a !== b && linkAlpha(a, b) > 0) pulses.push({ a, b, prog: 0, speed: 1.0 + Math.random() * 0.8 });
+      }
+      for (let i = pulses.length - 1; i >= 0; i--) {
+        const pl = pulses[i];
+        pl.prog += pl.speed * dt;
+        if (pl.prog >= 1) { pulses.splice(i, 1); continue; }
+        const x = pl.a.x + (pl.b.x - pl.a.x) * pl.prog;
+        const y = pl.a.y + (pl.b.y - pl.a.y) * pl.prog;
+        const fade = centerFade(x, y) * Math.sin(pl.prog * Math.PI);
+        ctx.fillStyle = 'rgba(22,24,29,' + (0.5 * fade).toFixed(3) + ')';
+        ctx.beginPath(); ctx.arc(x, y, 2, 0, 6.2832); ctx.fill();
+      }
+    }
+    for (const p of nodes) {
+      const fade = centerFade(p.x, p.y);
+      const tw = reduced ? 0.7 : 0.55 + 0.45 * Math.sin(t * p.twS + p.tw);
+      const alpha = fade * (0.22 + 0.4 * tw);
+      if (alpha <= 0.004) continue;
+      if (p.big) {
+        ctx.fillStyle = 'rgba(22,24,29,' + (alpha * 0.22).toFixed(3) + ')';
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 4, 0, 6.2832); ctx.fill();
+      }
+      ctx.fillStyle = 'rgba(22,24,29,' + alpha.toFixed(3) + ')';
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.2832); ctx.fill();
+    }
+  }
+
+  resize();
+  for (let i = 0; i < N; i++) { const p = {}; spawnNode(p); nodes.push(p); }
+  if (reduced) {
+    step(0);
+  } else {
+    window.addEventListener('resize', resize);
+    (function loop(ts) {
+      const dt = Math.min(0.05, (ts - last) / 1000 || 0.016);
+      last = ts;
+      step(dt);
+      requestAnimationFrame(loop);
+    })(0);
+  }
+})();
+
+/* ===== 初始化 ===== */
+renderFilterBar();
+renderCards();
+bindListEvents();
+const qp = new URLSearchParams(location.search);
+const wantedId = qp.get('model') || decodeURIComponent(location.hash.replace(/^#model=/, ''));
+if (qp.get('view') === 'console' || location.hash === '#console') showConsole();
+else if (wantedId && MODELS.some((m) => m.id === wantedId)) openDetail(wantedId);
+
+
+
+
+</script>
+</body>
+</html>
