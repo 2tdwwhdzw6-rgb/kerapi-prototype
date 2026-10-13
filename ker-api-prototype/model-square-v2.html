@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>模型广场 · KerAPI</title>
+<style>
+:root {
+  --primary: #16181d;
+  --primary-deep: #000000;
+  --primary-bg: #eef0f4;
+  --bg: #f7f8fa;
+  --card: #ffffff;
+  --border: #e8eaef;
+  --border-2: #d9dce3;
+  --text: #1a1d24;
+  --text-2: #585e6b;
+  --text-3: #8a90a0;
+  --green: #0f9d58;
+  --green-bg: #e8f7ef;
+  --amber: #b45309;
+  --amber-bg: #fef3e2;
+  --radius: 14px;
+  --shadow-1: 0 1px 2px rgba(16, 18, 27, .04);
+  --shadow-2: 0 8px 24px rgba(16, 18, 27, .10);
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+[hidden] { display: none !important; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.6;
+}
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+input, select { font-family: inherit; }
+::selection { background: #e2e5ea; }
+
+/* ---------- 通用按钮 / Logo ---------- */
+.logo-mark {
+  width: 30px; height: 30px; border-radius: 8px; flex: none;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.92) 0%, rgba(255,255,255,.55) 100%) padding-box,
+    linear-gradient(135deg, #2a2d35 0%, #101218 100%);
+  position: relative; display: grid; place-items: center;
+}
+.logo-mark::before {
+  content: ""; width: 14px; height: 14px; background: #c9cdd6;
+  transform: rotate(45deg) scale(.82); border-radius: 2px;
+  background: conic-gradient(from 45deg, #d7dae2 0 25%, #7c828f 0 50%, #d7dae2 0 75%, #7c828f 0);
+}
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 36px; padding: 0 16px; border-radius: 9px; font-size: 14px; font-weight: 500;
+  transition: all .15s; white-space: nowrap;
+}
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-deep); }
+.btn-ghost { border: 1px solid var(--border-2); color: var(--text); background: #fff; }
+.btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
+
+/* ---------- 顶部导航 ---------- */
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(255,255,255,.88); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.topbar-inner {
+  max-width: 1280px; margin: 0 auto; padding: 0 24px;
+  height: 60px; display: flex; align-items: center;
+}
+.logo { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 700; letter-spacing: .2px; }
+.nav-links { display: flex; gap: 8px; margin-left: auto; align-items: center; }
+.nav-links a {
+  padding: 7px 14px; border-radius: 8px; font-size: 14px; color: var(--text-2); transition: all .15s;
+}
+.nav-links a:hover { color: var(--text); }
+.nav-links a.active { color: #16181d; font-weight: 600; }
+.topbar-actions { display: flex; align-items: center; gap: 10px; margin-left: 16px; }
+.btn-pill {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 36px; padding: 0 18px; border-radius: 999px; font-size: 14px; font-weight: 500;
+  background: #16181d; color: #fff; transition: all .15s;
+}
+.btn-pill:hover { background: #000; }
+
+/* ---------- Hero（半屏居中，参考硅基流动模型广场） ---------- */
+.hero {
+  position: relative; overflow: hidden; text-align: center;
+  padding: 72px 24px 60px;
+  background:
+    radial-gradient(120% 90% at 50% -20%, #e7e9ef 0%, rgba(231, 233, 239, 0) 60%),
+    linear-gradient(180deg, #eef0f4 0%, rgba(247, 248, 250, 0) 100%);
+}
+.hero-inner { max-width: 720px; margin: 0 auto; position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; }
+.badge-pill { display: inline-flex; padding: 4px 12px; border-radius: 999px; background: rgba(255, 255, 255, .75); font-size: 12.5px; color: var(--text-2); }
+.hero h1 { font-size: 46px; font-weight: 700; letter-spacing: .5px; margin-top: 16px; line-height: 1.25; }
+.hero h1 .grad { background: linear-gradient(92deg, #16181d 10%, #4b5563 60%, #6b7280 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero .sub { margin-top: 12px; font-size: 16px; color: var(--text-2); }
+.hero .sub b { color: var(--text); }
+.search-box {
+  width: min(480px, 100%); margin: 30px auto 0; display: flex; align-items: center;
+  background: #fff; border: 1.5px solid var(--border-2); border-radius: 12px;
+  padding: 0 6px 0 16px; height: 48px; box-shadow: var(--shadow-1); transition: border-color .15s;
+}
+.search-box:focus-within { border-color: #16181d; }
+.search-box svg { flex: none; color: var(--text-3); }
+.search-box input { flex: 1; border: none; outline: none; font-size: 15px; height: 100%; background: transparent; }
+.search-box input::placeholder { color: var(--text-3); }
+.search-box .btn { height: 36px; }
+.hot-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+.hot-row .lbl { font-size: 13px; color: var(--text-3); }
+.hot-chip {
+  padding: 4px 12px; border-radius: 999px; background: #fff; border: 1px solid var(--border);
+  font-size: 13px; color: var(--text-2); transition: all .15s;
+}
+.hot-chip:hover { border-color: #16181d; color: #16181d; background: #f5f5f7; }
+
+/* ---------- 筛选 chips（控制台筛选面板复用） ---------- */
+.f-row { display: flex; align-items: flex-start; gap: 14px; padding: 6px 0; }
+.f-label { flex: none; width: 62px; padding-top: 6px; font-size: 13px; color: var(--text-3); }
+.f-opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.f-opt {
+  padding: 5px 13px; border-radius: 8px; font-size: 13px; color: var(--text-2);
+  background: #fff; border: 1px solid var(--border); transition: all .15s; display: inline-flex; gap: 6px; align-items: center;
+}
+.f-opt:hover { border-color: var(--primary); color: var(--primary); }
+.f-opt.active { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 500; }
+.f-divider { height: 1px; background: var(--border); margin: 8px 0; }
+.f-bottom { display: flex; align-items: center; justify-content: space-between; padding-top: 10px; gap: 12px; flex-wrap: wrap; }
+.result-count { font-size: 13px; color: var(--text-3); }
+.result-count b { color: var(--text); font-weight: 600; }
+.f-tools { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.f-tools .tool-lbl { font-size: 13px; color: var(--text-3); }
+.sort-select {
+  height: 32px; border-radius: 8px; border: 1px solid var(--border-2); background: #fff;
+  font-size: 13px; color: var(--text); padding: 0 8px; outline: none; cursor: pointer;
+}
+
+/* ---------- 价值点横幅（hero 与模型列表之间） ---------- */
+
+/* ---------- 筛选区（一级页常驻筛选条） ---------- */
+.filterbar {
+  position: sticky; top: 60px; z-index: 90;
+  background: rgba(255,255,255,.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border); margin-top: 0;
+}
+.filter-inner { max-width: 1280px; margin: 0 auto; padding: 14px 24px 12px; }
+
+/* ---------- 卡片通用 ---------- */
+.avatar {
+  width: 38px; height: 38px; border-radius: 10px; flex: none; display: grid; place-items: center;
+  color: #fff; font-size: 16px; font-weight: 700;
+}
+.badge {
+  display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 6px;
+  font-size: 12px; font-weight: 500; white-space: nowrap;
+}
+.b-type-chat, .b-type-image, .b-type-video, .b-type-audio,
+.b-type-embedding, .b-type-rerank { background: #f3f4f7; color: #1a1d24; }
+.b-free  { background: var(--green-bg); color: var(--green); }
+.b-pro   { background: #16181d; color: #fff; }
+.b-status { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-3); }
+.b-status i { width: 6px; height: 6px; border-radius: 50%; background: var(--green); display: inline-block; }
+.b-status.st-preview i { background: #d97706; }
+.b-status.st-preview { color: var(--amber); }
+.cap { font-size: 12px; color: var(--text-2); background: #f3f4f7; border-radius: 6px; padding: 2px 8px; }
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.stag {
+  font-size: 12px; color: var(--primary); background: var(--primary-bg);
+  border-radius: 6px; padding: 2px 8px; white-space: nowrap; font-weight: 500;
+}
+.empty-state { text-align: center; padding: 80px 0; color: var(--text-3); }
+.empty-state .t { font-size: 15px; margin-bottom: 6px; color: var(--text-2); }
+
+/* ---------- 一级页模型卡片 ---------- */
+.cards-wrap { max-width: 1280px; margin: 0 auto; padding: 22px 24px 56px; }
+.cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.card {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 18px 18px 14px; cursor: pointer; display: flex; flex-direction: column; gap: 10px;
+  transition: transform .18s, box-shadow .18s, border-color .18s; position: relative;
+}
+.card:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); border-color: #c7cbd4; }
+.card-head { display: flex; align-items: flex-start; gap: 10px; }
+.card-titles { flex: 1; min-width: 0; }
+.card-name { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.card-name .nm { font-size: 15px; font-weight: 650; }
+.card-name .free-dot { color: var(--green); font-size: 12px; font-weight: 600; }
+.model-id { font-family: var(--mono); font-size: 12px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card-desc {
+  font-size: 13px; color: var(--text-2); line-height: 1.55; height: 40px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.cap-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.card-metrics {
+  border-top: 1px dashed var(--border); margin-top: 2px; padding-top: 10px;
+  display: grid; grid-template-columns: 1fr; gap: 8px 12px;
+}
+.metric .m-lbl { font-size: 11px; color: var(--text-3); }
+.metric .m-val { font-size: 13px; font-weight: 600; margin-top: 1px; }
+.metric .m-val .unit { font-weight: 400; color: var(--text-3); font-size: 11px; }
+.card-foot {
+  border-top: 1px dashed var(--border); padding-top: 8px; margin-top: 2px;
+  display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--text-3);
+}
+.card-foot .sp { flex: 1; }
+.go-detail { font-size: 12px; color: var(--primary); opacity: 0; transform: translateX(-4px); transition: all .18s; display: inline-flex; align-items: center; gap: 3px; }
+.card:hover .go-detail { opacity: 1; transform: none; }
+
+/* ---------- 一级页配色（对齐官网设计：黑白灰） ---------- */
+.sort-select:focus { border-color: #16181d; }
+
+/* ---------- 模型详情页 ---------- */
+.detail-wrap { max-width: 1200px; margin: 0 auto; padding: 20px 24px 60px; }
+.detail-head {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 22px 24px; display: flex; gap: 16px; align-items: flex-start;
+}
+.dh-info { flex: 1; min-width: 0; }
+.dh-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.dh-name { font-size: 22px; font-weight: 700; }
+.dh-id {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 6px;
+  font-family: var(--mono); font-size: 13px; color: var(--text-2); background: #f3f4f7;
+  border-radius: 8px; padding: 4px 10px; width: fit-content;
+}
+.copy-mini { font-size: 12px; color: var(--text-3); cursor: pointer; border: none; background: none; }
+.copy-mini:hover { color: var(--primary); }
+.dh-badges { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
+.dh-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 16px; }
+.stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+.stat-card .s-lbl { font-size: 12px; color: var(--text-3); }
+.stat-card .s-val { font-size: 18px; font-weight: 700; margin-top: 2px; }
+.stat-card .s-val .unit { font-size: 12px; font-weight: 400; color: var(--text-3); }
+.detail-cols { display: grid; grid-template-columns: 1fr 380px; gap: 16px; margin-top: 16px; align-items: start; }
+.panel { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; }
+.panel + .panel { margin-top: 16px; }
+.panel h3 { font-size: 15px; font-weight: 650; display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.panel h3 .p-sub { font-size: 12px; color: var(--text-3); font-weight: 400; margin-left: auto; }
+.spec-table { width: 100%; border-collapse: collapse; }
+.spec-table th, .spec-table td { padding: 9px 12px; font-size: 13px; text-align: left; border-bottom: 1px solid #f0f1f4; }
+.spec-table tr:last-child th, .spec-table tr:last-child td { border-bottom: none; }
+.spec-table th { color: var(--text-3); font-weight: 400; width: 140px; }
+.price-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.price-table th, .price-table td { padding: 8px 10px; border-bottom: 1px solid #f0f1f4; text-align: right; }
+.price-table th { color: var(--text-3); font-weight: 500; white-space: nowrap; }
+.price-table td:first-child, .price-table th:first-child { text-align: left; }
+.price-table tr:last-child td { border-bottom: none; }
+.price-table .ch-name { font-weight: 600; }
+.price-table .ch-sub { font-size: 11px; color: var(--text-3); font-weight: 400; }
+.price-table .mult { display: inline-block; font-size: 10px; color: var(--text-2); background: #f3f4f7; border-radius: 4px; padding: 1px 5px; margin-left: 6px; vertical-align: 1px; }
+.price-table .dim td { color: var(--text-3); background: #fafbfc; font-size: 12px; }
+.price-table .cur-lv { color: var(--primary); font-weight: 700; }
+.callout {
+  margin-top: 12px; font-size: 12.5px; color: var(--text-2); background: var(--primary-bg);
+  border-radius: 10px; padding: 10px 12px; line-height: 1.6;
+}
+.api-list { display: flex; flex-direction: column; gap: 8px; }
+.api-item {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--border);
+  border-radius: 10px; font-size: 13px;
+}
+.api-item .mono { font-family: var(--mono); font-weight: 600; }
+.api-item .ok { margin-left: auto; color: var(--green); font-size: 12px; }
+.api-item .no { margin-left: auto; color: var(--text-3); font-size: 12px; }
+.detail-aside { position: sticky; top: 84px; display: flex; flex-direction: column; gap: 16px; }
+.code-card { background: #0f1117; border-radius: var(--radius); overflow: hidden; }
+.code-head { display: flex; align-items: center; padding: 10px 14px; border-bottom: 1px solid #23262f; flex-wrap: wrap; gap: 8px; }
+.code-tabs { display: flex; gap: 4px; }
+.code-tabs button {
+  padding: 5px 12px; border-radius: 7px; font-size: 12.5px; color: #9aa1b2; transition: all .15s;
+}
+.code-tabs button.active { background: #23262f; color: #fff; }
+.code-lang { display: flex; gap: 2px; margin-left: 8px; background: #171a21; border-radius: 7px; padding: 2px; }
+.code-lang button { padding: 4px 10px; border-radius: 6px; font-size: 12px; color: #9aa1b2; }
+.code-lang button.active { background: #2a2e39; color: #fff; }
+.copy-btn {
+  margin-left: auto; font-size: 12px; color: #c9cedb; display: inline-flex; gap: 5px; align-items: center;
+  padding: 5px 10px; border-radius: 7px; border: 1px solid #2a2e39; transition: all .15s;
+}
+.copy-btn:hover { color: #fff; border-color: #4a5060; }
+.code-card pre {
+  margin: 0; padding: 14px 16px; overflow-x: auto; font-family: var(--mono);
+  font-size: 12.5px; line-height: 1.65; color: #d6deeb; max-height: 320px;
+}
+.code-card pre .cmt { color: #5c6672; }
+.code-card pre .str { color: #9ece8c; }
+.code-card pre .kw { color: #c792ea; }
+
+/* ---------- 模型详情右侧抽屉 ---------- */
+.drawer-mask {
+  position: fixed; inset: 0; z-index: 200; background: rgba(15, 17, 23, .45);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity .25s ease, visibility 0s linear .25s;
+}
+.drawer-mask.open { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity .25s ease; }
+.drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 201;
+  width: min(880px, 94vw); background: var(--bg); display: flex; flex-direction: column;
+  box-shadow: -16px 0 48px rgba(16, 18, 27, .22);
+  transform: translateX(103%); visibility: hidden; pointer-events: none;
+  transition: transform .32s cubic-bezier(.22, .68, .32, 1), visibility 0s linear .32s;
+}
+.drawer.open { transform: none; visibility: visible; pointer-events: auto; transition: transform .32s cubic-bezier(.22, .68, .32, 1); }
+.drawer-bar {
+  flex: none; height: 54px; display: flex; align-items: center; gap: 10px; padding: 0 14px 0 24px;
+  background: rgba(255, 255, 255, .92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+.drawer-bar .d-title { font-size: 15px; font-weight: 650; white-space: nowrap; }
+.drawer-bar .d-sub {
+  font-family: var(--mono); font-size: 12px; color: var(--text-3);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.drawer-close {
+  margin-left: auto; flex: none; width: 32px; height: 32px; border-radius: 8px;
+  display: grid; place-items: center; font-size: 14px; color: var(--text-2);
+  border: 1px solid transparent; transition: all .15s;
+}
+.drawer-close:hover { background: #f1f2f5; color: var(--text); border-color: var(--border); }
+.drawer-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.drawer .detail-wrap { max-width: none; margin: 0; padding: 18px 24px 48px; }
+.drawer .detail-cols { grid-template-columns: 1fr; }
+.drawer .detail-aside { position: static; }
+@media (max-width: 720px) { .drawer { width: 100vw; } .drawer-bar .d-sub { display: none; } }
+
+/* ---------- 控制台 · 模型广场 ---------- */
+@media (max-width: 900px) { .c-side { display: none; } }
+
+/* ---------- Footer ---------- */
+
+/* ---------- Toast / 响应式 ---------- */
+.toast {
+  position: fixed; left: 50%; bottom: 40px; transform: translateX(-50%); z-index: 999;
+  background: rgba(16, 18, 24, .92); color: #fff; font-size: 13px;
+  padding: 9px 18px; border-radius: 10px; box-shadow: var(--shadow-2); animation: toast-in .2s;
+}
+@media (max-width: 1080px) {
+  .cards-grid { grid-template-columns: repeat(2, 1fr); }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .detail-cols { grid-template-columns: 1fr; }
+  .detail-aside { position: static; }
+}
+@media (max-width: 720px) {
+  .nav-links { display: none; }
+  .hero h1 { font-size: 28px; }
+  .hero { padding: 48px 20px 44px; }
+  .cards-grid { grid-template-columns: 1fr; }
+  .f-row { flex-direction: column; gap: 6px; }
+  .f-label { width: auto; padding-top: 0; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+  .detail-head { flex-direction: column; }
+  .dh-actions { width: 100%; }
+}
+
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="logo" href="#">
+      <span class="logo-mark"></span>KerAPI
+    </a>
+    <nav class="nav-links">
+      <a href="#">主页</a>
+      <a href="#" class="active">模型广场</a>
+      <a href="../kerminal_work/docs.html#/introduction">文档</a>
+    </nav>
+    <div class="topbar-actions">
+      <a class="btn-pill" href="#">登录</a>
+    </div>
+  </div>
+</header>
+
+<main id="listView">
+  <section class="hero">
+    <div class="hero-inner">
+      <h1>主流模型，<span class="grad">尽在模型广场</span></h1>
+      <p class="sub">按类型、厂商、价格自由筛选，找到最适合的那一个</p>
+      <div class="search-box">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="searchInput" type="text" placeholder="搜索模型名称、供应商、端点或标签...">
+        <button class="btn btn-primary btn-sm">搜索</button>
+      </div>
+      <div class="hot-row">
+        <span class="lbl">热门模型：</span>
+        <a class="hot-chip" data-q="GLM-5.3">GLM-5.3</a>
+        <a class="hot-chip" data-q="Flash">GLM-5.3-Flash</a>
+        <a class="hot-chip" data-q="deepseek">deepseek-v4.1-flash</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="filterbar">
+    <div class="filter-inner">
+      <div class="f-row">
+        <span class="f-label">模型类型</span>
+        <div class="f-opts type-opts"></div>
+      </div>
+      <div class="f-divider"></div>
+      <div class="f-row">
+        <span class="f-label">系列</span>
+        <div class="f-opts series-opts"></div>
+      </div>
+      <div class="f-divider"></div>
+      <div class="f-row">
+        <span class="f-label">能力标签</span>
+        <div class="f-opts cap-opts"></div>
+      </div>
+      <div class="f-divider"></div>
+      <div class="f-bottom">
+        <span class="result-count" id="resultCount"></span>
+        <div class="f-tools">
+          <span class="tool-lbl">排序</span>
+          <select class="sort-select">
+            <option value="default">默认（热度）</option>
+            <option value="price-asc">价格从低到高</option>
+            <option value="price-desc">价格从高到低</option>
+            <option value="ctx-desc">上下文长度</option>
+            <option value="released-desc">最新发布</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cards-wrap">
+    <div class="cards-grid" id="cardsGrid"></div>
+    <div class="empty-state" id="emptyState" hidden>
+      <div class="t">没有找到符合条件的模型</div>
+      <div>试试更换关键词或清除筛选条件</div>
+    </div>
+  </section>
+</main>
+
+<div class="drawer-mask" id="detailMask"></div>
+<aside class="drawer" id="detailView" aria-hidden="true">
+  <div class="drawer-bar">
+    <span class="d-title" id="drawerTitle">模型详情</span>
+    <span class="d-sub" id="drawerSub"></span>
+    <button class="drawer-close" id="drawerClose" title="关闭（Esc）">✕</button>
+  </div>
+  <div class="drawer-body">
+    <div class="detail-wrap" id="detailBody"></div>
+  </div>
+</aside>
+
+<div id="toast" class="toast" hidden></div>
+
+<script>
+'use strict';
+
+/* ===== 价格（标准价 = model_ratio 换算，分组倍率由平台配置）===== */
+
+const VENDORS = {
+  'deepseek-ai': { name: 'DeepSeek 深度求索', color: '#4d6bfe' },
+  'zai-org':     { name: '智谱 AI', color: '#3859ff' },
+};
+
+const SERIES = {
+  'deepseek-ai': 'DeepSeek',
+  'zai-org':     '智谱',
+};
+
+const TYPES = [
+  { key: 'all', label: '全部' },
+  { key: 'chat', label: '对话' },
+  { key: 'image', label: '生图' },
+  { key: 'video', label: '视频' },
+  { key: 'audio', label: '语音' },
+  { key: 'embedding', label: '嵌入' },
+  { key: 'rerank', label: '重排序' },
+];
+
+const CAP_CHIPS = ['工具调用', '视觉输入', '结构化输出', '长上下文', 'Responses API', 'Claude 端点'];
+
+/* ===== 模型数据（对齐线上 /api/pricing，描述风格参考硅基流动模型广场）=====
+   价格换算：new-api 倍率体系 model_ratio 1 = $2 / M tokens，按 1 USD ≈ ¥7 展示为人民币
+   - deepseek-v4.1-flash：ratio 0.142857 → 输入 ¥2/M；补全倍率 4 → 输出 ¥8/M；缓存倍率 0.02
+   - GLM-5.3：ratio 0.571429 → 输入 ¥8/M；补全倍率 3.5 → 输出 ¥28/M；缓存倍率 0.25
+   - GLM-5.3-Flash：ratio 0.057143 → 输入 ¥0.8/M；补全倍率 3.5 → 输出 ¥2.8/M；缓存倍率 0.2875
+   字段说明详见同目录《模型字段说明（研发版）.md》 */
+const MODELS = [
+  {
+    id: 'deepseek-v4.1-flash', name: 'DeepSeek-V4.1-Flash', vendor: 'deepseek-ai',
+    type: 'chat', free: false, pro: false, hot: true, status: '稳定', released: '2026-09-25',
+    desc: 'DeepSeek-V4.1-Flash 是 DeepSeek-V4 系列中的轻量 MoE 语言模型，总参数量 284B、激活参数量 13B，支持 1M tokens 超长上下文与最高 384K tokens 输出。模型采用 CSA 与 HCA 混合注意力架构，引入流形约束超连接（mHC）与 DSpark 推测解码，显著提升长上下文推理效率；V4.1 版本针对智能体与编程能力进行后训练强化，原生支持 OpenAI Responses API 与 Codex 适配，reasoning_effort 支持 low / high / max 三档调节，适用于复杂 Agent 工作流、长文本理解与代码任务。',
+    tags: ['Vibe Coding', '长文本处理', '快速响应'],
+    func: ['🛠️ 工具调用', '🧩 结构化输出', '📄 前缀续写'],
+    caps: ['工具调用', '结构化输出', '长上下文', 'Responses API'],
+    rpm: 500, tpm: 2000000, ctxK: 1024, maxOutK: 384,
+    billing: [['模型输入', 2, 'M Tokens'], ['模型输出', 8, 'M Tokens'], ['缓存输入', 0.04, 'M Tokens', '0.02×']],
+    specs:[['上下文长度', '1024K tokens'], ['最大输出', '384K tokens'], ['输入类型', '文本'], ['输出类型', '文本'], ['参数量', '284B（激活 13B）'], ['支持端点', 'OpenAI Chat Completions / Responses'], ['RPM / TPM', '500 / 2,000,000'], ['收费类型', '按 Token 计费']],
+    apis: { chat: true, responses: true },
+    foot: [['上下文', '1M'], ['参数量', '284B']],
+  },
+  {
+    id: 'GLM-5.3', name: 'GLM-5.3', vendor: 'zai-org',
+    type: 'chat', free: false, pro: true, hot: true, status: '稳定', released: '2026-08-14',
+    desc: 'GLM-5.3 是智谱 AI 推出的 GLM-5 系列旗舰模型，沿用与 GLM-5.2 相同的基础模型，通过后训练在复杂编码、网络安全和长程智能体任务上实现显著提升。模型采用 MoE 架构，总参数量约 744B、激活参数约 40B，原生支持 1M tokens 上下文窗口、函数调用与结构化输出，适用于复杂软件工程、漏洞发现与长程智能体任务。平台同时提供 OpenAI Chat Completions、Anthropic Messages（Claude Code / Claude 桌面端可直接接入）与 Responses 三种端点。',
+    tags: ['旗舰全能', 'Vibe Coding', '长文本处理'],
+    func: ['🛠️ 工具调用', '🧩 结构化输出', '⚡ Responses API', '🤝 Claude 端点兼容'],
+    caps: ['工具调用', '结构化输出', '长上下文', 'Responses API', 'Claude 端点'],
+    rpm: 500, tpm: 2000000, ctxK: 1024, maxOutK: 128,
+    billing: [['模型输入', 8, 'M Tokens'], ['模型输出', 28, 'M Tokens'], ['缓存输入', 2, 'M Tokens', '0.25×']],
+    specs: [['上下文长度', '1024K tokens'], ['最大输出', '128K tokens'], ['输入类型', '文本'], ['输出类型', '文本'], ['参数量', '744B（激活 40B）'], ['支持端点', 'OpenAI Chat / Anthropic Messages / Responses'], ['RPM / TPM', '500 / 2,000,000'], ['收费类型', '按 Token 计费']],
+    apis: { chat: true, responses: true, messages: true },
+    foot: [['上下文', '1M'], ['参数量', '744B']],
+  },
+  {
+    id: 'GLM-5.3-Flash', name: 'GLM-5.3-Flash', vendor: 'zai-org',
+    type: 'chat', free: false, pro: false, hot: true, status: '稳定', released: '2026-08-26',
+    desc: 'GLM-5.3-Flash 是智谱推出的原生多模态模型，总参数 320B、激活参数 18B，采用稀疏注意力与线性注意力混合架构，支持 1M 上下文，擅长视觉理解、编程、深度推理与复杂智能体任务。相比 GLM-5.3 推理成本大幅降低，适合高并发的日常对话、文档图片解析与 Agent 应用；平台提供 OpenAI Chat Completions、Anthropic Messages 与 Responses 三种端点。',
+    tags: ['多模态理解 / 识别', '快速响应', '通用助手'],
+    func: ['🛠️ 工具调用', '👁️ 视觉输入', '🧩 结构化输出', '🤝 Claude 端点兼容'],
+    caps: ['工具调用', '视觉输入', '结构化输出', '长上下文', 'Claude 端点'],
+    rpm: 500, tpm: 2000000, ctxK: 1024, maxOutK: 128,
+    billing: [['模型输入', 0.8, 'M Tokens'], ['模型输出', 2.8, 'M Tokens'], ['缓存输入', 0.23, 'M Tokens', '0.2875×']],
+    specs: [['上下文长度', '1024K tokens'], ['最大输出', '128K tokens'], ['输入类型', '文本 / 图像'], ['输出类型', '文本'], ['参数量', '320B（激活 18B）'], ['支持端点', 'OpenAI Chat / Anthropic Messages / Responses'], ['RPM / TPM', '500 / 2,000,000'], ['收费类型', '按 Token 计费']],
+    apis: { chat: true, responses: true, messages: true },
+    foot: [['上下文', '1M'], ['输入', '文本 / 图像']],
+  },
+];
+
+/* ===== 列表页状态与渲染 ===== */
+const state = { type: 'all', series: 'all', caps: new Set(), q: '', sort: 'default' };
+const $ = (sel) => document.querySelector(sel);
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const fmtNum = (n) => n >= 1000000 ? (n / 1000000).toFixed(n % 1000000 ? 1 : 0) + 'M' : n >= 1000 ? (n / 1000).toFixed(n % 1000 ? 1 : 0) + 'K' : String(n);
+
+function priceText(m) {
+  if (m.free) return '<span class="free-tag">免费</span>';
+  if (m.type === 'chat' || m.type === 'embedding' || m.type === 'rerank') {
+    const f = (v) => '¥' + (Math.round(v * 100) / 100).toString().replace(/\.?0+$/, '');
+    const cache = m.billing[2] ? ` · 缓存 ${f(m.billing[2][1])}` : '';
+    return `输入 ${f(m.billing[0][1])} / 输出 ${f(m.billing[1] ? m.billing[1][1] : m.billing[0][1])}${cache} <span class="unit">/ M Tokens</span>`;
+  }
+  const first = m.billing[0];
+  return '¥' + (Math.round(first[1] * 100) / 100) + ` <span class="unit">/ ${first[2]}</span>`;
+}
+
+const isNew = (m) => Date.now() - new Date(m.released).getTime() < 90 * 86400000;
+
+function matchModel(m) {
+  if (state.type !== 'all' && m.type !== state.type) return false;
+  if (state.series !== 'all' && (SERIES[m.vendor] || '其他') !== state.series) return false;
+  for (const cap of state.caps) {
+    if (cap === '免费' && !m.free) return false;
+    if (cap === 'Pro' && !m.pro) return false;
+    if (!m.caps.includes(cap)) return false;
+  }
+  if (state.q) {
+    const hay = `${m.id} ${m.name} ${VENDORS[m.vendor].name} ${m.desc} ${m.caps.join(' ')} ${m.free ? '免费' : ''}`.toLowerCase();
+    if (!hay.includes(state.q.toLowerCase())) return false;
+  }
+  return true;
+}
+
+function sortModels(list) {
+  const priceOf = (m) => m.free ? 0 : (m.billing[0][1] + (m.billing[1] ? m.billing[1][1] : 0));
+  const arr = [...list];
+  if (state.sort === 'price-asc') arr.sort((a, b) => priceOf(a) - priceOf(b));
+  else if (state.sort === 'price-desc') arr.sort((a, b) => priceOf(b) - priceOf(a));
+  else if (state.sort === 'ctx-desc') arr.sort((a, b) => (b.ctxK || 0) - (a.ctxK || 0));
+  else if (state.sort === 'released-desc') arr.sort((a, b) => b.released.localeCompare(a.released));
+  else arr.sort((a, b) => (b.hot ? 1 : 0) - (a.hot ? 1 : 0) || b.released.localeCompare(a.released));
+  return arr;
+}
+
+function cardHTML(m) {
+  const v = VENDORS[m.vendor];
+  const tagRow = (m.tags || []).map((t) => `<span class="stag">${esc(t)}</span>`).join('');
+  const funcRow = (m.func || []).map((c) => `<span class="cap">${esc(c)}</span>`).join('');
+  return `
+  <article class="card" data-id="${esc(m.id)}">
+    <div class="card-head">
+      <div class="avatar" style="background:${v.color}">${esc(m.name[0])}</div>
+      <div class="card-titles">
+        <div class="card-name"><span class="nm">${esc(m.name)}</span>${m.free ? '<span class="free-dot">免费</span>' : ''}${m.pro ? '<span class="badge b-pro">Pro</span>' : ''}</div>
+        <div class="model-id">${esc(m.id)}</div>
+      </div>
+      <span class="badge b-type-${m.type}">${TYPES.find((t) => t.key === m.type).label}</span>
+    </div>
+    <p class="card-desc">${esc(m.desc)}</p>
+    <div class="cap-row">${tagRow}${funcRow}</div>
+    <div class="card-metrics">
+      <div class="metric"><div class="m-lbl">价格</div><div class="m-val price">${priceText(m)}</div></div>
+    </div>
+    <div class="card-foot">
+      <span>${m.foot.map(([k, val]) => `${k} ${val}`).join(' · ')}</span>
+      <span class="go-detail">查看详情 →</span>
+    </div>
+  </article>`;
+}
+
+function renderCards() {
+  const list = sortModels(MODELS.filter(matchModel));
+  $('#cardsGrid').innerHTML = list.map(cardHTML).join('');
+  $('#emptyState').hidden = list.length > 0;
+  const countTxt = `共 <b>${list.length}</b> 个模型`;
+  $('#resultCount').innerHTML = countTxt;
+}
+
+function renderFilterBar() {
+  const typeHTML = TYPES.map((t) =>
+    `<button class="f-opt ${state.type === t.key ? 'active' : ''}" data-type="${t.key}">${t.label}</button>`
+  ).join('');
+  const seriesHTML = `<button class="f-opt ${state.series === 'all' ? 'active' : ''}" data-series="all">全部</button>` +
+    Object.values(SERIES).map((s) => `<button class="f-opt ${state.series === s ? 'active' : ''}" data-series="${s}">${s}</button>`).join('');
+  const capHTML = CAP_CHIPS.map((c) => `<button class="f-opt ${state.caps.has(c) ? 'active' : ''}" data-cap="${c}">${c}</button>`).join('');
+  document.querySelectorAll('.type-opts').forEach((el) => el.innerHTML = typeHTML);
+  document.querySelectorAll('.series-opts').forEach((el) => el.innerHTML = seriesHTML);
+  document.querySelectorAll('.cap-opts').forEach((el) => el.innerHTML = capHTML);
+}
+
+function bindListEvents() {
+  document.addEventListener('click', (e) => {
+    const typeB = e.target.closest('[data-type]');
+    if (typeB) { state.type = typeB.dataset.type; renderFilterBar(); renderCards(); return; }
+    const seriesB = e.target.closest('[data-series]');
+    if (seriesB) { state.series = seriesB.dataset.series; renderFilterBar(); renderCards(); return; }
+    const capB = e.target.closest('[data-cap]');
+    if (capB) {
+      state.caps.has(capB.dataset.cap) ? state.caps.delete(capB.dataset.cap) : state.caps.add(capB.dataset.cap);
+      renderFilterBar(); renderCards(); return;
+    }
+  });
+  document.addEventListener('change', (e) => {
+    if (e.target.classList.contains('sort-select')) {
+      state.sort = e.target.value;
+      document.querySelectorAll('.sort-select').forEach((s) => { if (s !== e.target) s.value = state.sort; });
+      renderCards();
+    }
+  });
+  $('#searchInput').addEventListener('input', (e) => { state.q = e.target.value.trim(); renderCards(); });
+  document.querySelectorAll('.hot-chip').forEach((c) => c.addEventListener('click', () => {
+    state.q = c.dataset.q;
+    $('#searchInput').value = c.dataset.q;
+    renderCards();
+  }));
+  $('#cardsGrid').addEventListener('click', (e) => { const card = e.target.closest('.card'); if (card) openDetail(card.dataset.id); });
+  $('#detailMask').addEventListener('click', closeDetail);
+  $('#drawerClose').addEventListener('click', closeDetail);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && drawerOpen()) closeDetail(); });
+}
+
+/* ===== 模型详情页 ===== */
+let currentModel = null;
+
+function priceTableHTML(m) {
+  const rows = m.billing.map(([label, base, unit, mult]) => {
+    const p = Math.round(base * 100) / 100;
+    const txt = p === 0 ? '<span style="color:var(--green)">免费</span>' : '¥' + p.toString().replace(/\.?0+$/, '');
+    return `<tr><td>${esc(label)}<span class="ch-sub"> / ${esc(unit)}</span>${mult ? `<span class="mult">×${esc(mult)}</span>` : ''}</td><td>${txt}</td></tr>`;
+  }).join('');
+  return `<table class="price-table"><thead><tr><th>计费项</th><th>标准价</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function detailHTML(m) {
+  const v = VENDORS[m.vendor];
+  const stats = [
+    ['输入价格', m.free ? '免费' : (m.type === 'chat' ? '¥' + m.billing[0][1] : '¥' + m.billing[0][1]), m.free ? '' : (m.type === 'chat' ? `/ M Tokens` : `/ ${m.billing[0][2]}`)],
+    ['输出价格', m.free ? '免费' : (m.billing[1] ? '¥' + m.billing[1][1] : '—'), m.free || !m.billing[1] ? '' : `/ M Tokens`],
+    ['上下文长度', m.foot[0][1], ''],
+    ['最大输出', m.maxOutK ? m.maxOutK + 'K tokens' : '—', ''],
+  ];
+  const apiDefs = [
+    ['POST /v1/chat/completions', 'Chat Completions · 对话补全', m.apis.chat],
+    ['POST /v1/messages', 'Messages · Anthropic 兼容（Claude Code 可用）', m.apis.messages],
+    ['POST /v1/responses', 'Responses · 新版响应 API', m.apis.responses],
+    ['POST /v1/embeddings', 'Embeddings · 文本向量化', m.apis.embeddings],
+    ['POST /v1/rerank', 'Rerank · 重排序', m.apis.rerank],
+    ['POST /v1/images/generations', 'Images · 图像生成', m.apis.images],
+    ['POST /v1/videos/generations', 'Videos · 视频生成', m.apis.video],
+    ['POST /v1/audio/speech', 'Audio · 语音合成', m.apis.audio],
+  ].filter(([, , ok]) => ok !== undefined);
+  return `
+  <div class="detail-head">
+    <div class="avatar" style="background:${v.color};width:56px;height:56px;font-size:24px;border-radius:14px">${esc(m.name[0])}</div>
+    <div class="dh-info">
+      <div class="dh-top">
+        <span class="dh-name">${esc(m.name)}</span>
+        <span class="badge b-type-${m.type}">${TYPES.find((t) => t.key === m.type).label}</span>
+        ${m.free ? '<span class="badge b-free">免费</span>' : ''}${m.pro ? '<span class="badge b-pro">Pro</span>' : ''}
+        <span class="b-status ${m.status === '预览' ? 'st-preview' : ''}"><i></i>${m.status}</span>
+      </div>
+      <div class="dh-id">${esc(m.id)}<button class="copy-mini" id="copyId">复制</button></div>
+      <div class="dh-badges">${(m.func || []).map((c) => `<span class="cap">${esc(c)}</span>`).join('') || '<span class="cap">—</span>'}<span style="font-size:12px;color:var(--text-3)">厂商：${esc(v.name)} · 发布于 ${m.released}</span></div>
+    </div>
+    <div class="dh-actions">
+      <a class="btn btn-ghost" href="../kerminal_work/docs.html#/api-chat">API 文档</a>
+    </div>
+  </div>
+  <div class="stats-row">${stats.map(([l, val, unit]) => `<div class="stat-card"><div class="s-lbl">${l}</div><div class="s-val">${val} <span class="unit">${unit}</span></div></div>`).join('')}</div>
+  <div class="detail-cols">
+    <div>
+      <div class="panel"><h3>📋 模型简介</h3>
+        <div class="cap-row" style="margin-bottom:10px">${(m.tags || []).map((t) => `<span class="stag">${esc(t)}</span>`).join('')}</div>
+        <p style="font-size:13.5px;color:var(--text-2);line-height:1.8">${esc(m.desc)}</p>
+      </div>
+      <div class="panel"><h3>🔧 规格参数</h3>
+        <table class="spec-table">
+          ${m.specs.map(([k, val]) => `<tr><th>${k}</th><td>${esc(val)}</td></tr>`).join('')}
+          <tr><th>发布时间</th><td>${m.released}</td></tr>
+          <tr><th>模型状态</th><td>${m.status}</td></tr>
+        </table>
+      </div>
+      <div class="panel"><h3>💰 价格明细<span class="p-sub">标准价，分组倍率以平台配置为准</span></h3>
+        ${priceTableHTML(m)}
+        <div class="callout">💡 该模型可用分组：default / vip / svip，分组折扣由平台统一配置。缓存命中部分的输入按「缓存输入」单价计费，可显著降低重复前缀场景的成本。</div>
+      </div>
+      <div class="panel"><h3>🔌 支持的 API</h3>
+        <div class="api-list">${apiDefs.map(([path, desc, ok]) => `<div class="api-item"><span class="mono">${path}</span><span style="color:var(--text-3);font-size:12px">${desc}</span><span class="${ok ? 'ok' : 'no'}">${ok ? '✓ 支持' : '✕ 不支持'}</span></div>`).join('')}</div>
+      </div>
+    </div>
+    <div class="detail-aside">
+      <div class="code-card">
+        <div class="code-head">
+          <div class="code-tabs" id="codeApiTabs"></div>
+          <div class="code-lang" id="codeLangTabs">
+            <button data-lang="curl" class="active">cURL</button><button data-lang="py">Python</button>
+          </div>
+          <button class="copy-btn" id="copyCode">⧉ 复制</button>
+        </div>
+        <pre id="codeBlock"></pre>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ===== 代码示例 ===== */
+const CODE = {
+  chat: {
+    label: 'Chat', build: (id, lang) => lang === 'curl'
+      ? `curl https://api.kerapi.com/v1/chat/completions \\\n  -H "Authorization: Bearer $KER_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "model": "${id}",\n    "messages": [\n      {"role": "user", "content": "你好，介绍一下你自己"}\n    ],\n    "stream": true\n  }'`
+      : `from openai import OpenAI\n\nclient = OpenAI(\n    api_key="KER_API_KEY",\n    base_url="https://api.kerapi.com/v1",\n)\n\nstream = client.chat.completions.create(\n    model="${id}",\n    messages=[{"role": "user", "content": "你好，介绍一下你自己"}],\n    stream=True,\n)\nfor chunk in stream:\n    print(chunk.choices[0].delta.content or "", end="")`,
+  },
+  responses: {
+    label: 'Responses', build: (id, lang) => lang === 'curl'
+      ? `curl https://api.kerapi.com/v1/responses \\\n  -H "Authorization: Bearer $KER_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "model": "${id}",\n    "input": "用一句话解释什么是向量数据库"\n  }'`
+      : `from openai import OpenAI\n\nclient = OpenAI(\n    api_key="KER_API_KEY",\n    base_url="https://api.kerapi.com/v1",\n)\n\nresp = client.responses.create(\n    model="${id}",\n    input="用一句话解释什么是向量数据库",\n)\nprint(resp.output_text)`,
+  },
+  images: {
+    label: '图像生成', build: (id, lang) => lang === 'curl'
+      ? `curl https://api.kerapi.com/v1/images/generations \\\n  -H "Authorization: Bearer $KER_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "model": "${id}",\n    "prompt": "一只在键盘上打字的橘猫，扁平插画风格",\n    "size": "1024x1024",\n    "n": 1\n  }'`
+      : `from openai import OpenAI\n\nclient = OpenAI(api_key="KER_API_KEY", base_url="https://api.kerapi.com/v1")\n\nimg = client.images.generate(\n    model="${id}",\n    prompt="一只在键盘上打字的橘猫，扁平插画风格",\n    size="1024x1024",\n)\nprint(img.data[0].url)`,
+  },
+  video: {
+    label: '视频生成', build: (id, lang) => lang === 'curl'
+      ? `curl https://api.kerapi.com/v1/videos/generations \\\n  -H "Authorization: Bearer $KER_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "model": "${id}",\n    "prompt": "镜头缓缓推近，晨光中的城市天际线",\n    "duration": 5,\n    "resolution": "1080p"\n  }'`
+      : `import requests\n\nresp = requests.post(\n    "https://api.kerapi.com/v1/videos/generations",\n    headers={"Authorization": "Bearer KER_API_KEY"},\n    json={\n        "model": "${id}",\n        "prompt": "镜头缓缓推近，晨光中的城市天际线",\n        "duration": 5,\n        "resolution": "1080p",\n    },\n)\nprint(resp.json()["id"])  # 异步任务，轮询查询结果`,
+  },
+  audio: {
+    label: '语音合成', build: (id, lang) => lang === 'curl'
+      ? `curl https://api.kerapi.com/v1/audio/speech \\\n  -H "Authorization: Bearer $KER_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "model": "${id}",\n    "input": "今天天气真不错，适合出去走走。",\n    "voice": "ker-female-01",\n    "response_format": "mp3"\n  }' --output speech.mp3`
+      : `from openai import OpenAI\n\nclient = OpenAI(api_key="KER_API_KEY", base_url="https://api.kerapi.com/v1")\n\nwith client.audio.speech.with_streaming_response.create(\n    model="${id}",\n    voice="ker-female-01",\n    input="今天天气真不错，适合出去走走。",\n) as resp:\n    resp.stream_to_file("speech.mp3")`,
+  },
+  messages: {
+    label: 'Messages', build: (id, lang) => lang === 'curl'
+      ? `curl https://api.kerapi.com/v1/messages \\\n  -H "x-api-key: $KER_API_KEY" \\\n  -H "anthropic-version: 2023-06-01" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "model": "${id}",\n    "max_tokens": 1024,\n    "messages": [{"role": "user", "content": "你好，介绍一下你自己"}]\n  }'`
+      : `from anthropic import Anthropic\n\nclient = Anthropic(\n    api_key="KER_API_KEY",\n    base_url="https://api.kerapi.com",\n)\n\nmsg = client.messages.create(\n    model="${id}",\n    max_tokens=1024,\n    messages=[{"role": "user", "content": "你好，介绍一下你自己"}],\n)\nprint(msg.content[0].text)`,
+  },
+  embeddings: {
+    label: 'Embeddings', build: (id, lang) => lang === 'curl'
+      ? `curl https://api.kerapi.com/v1/embeddings \\\n  -H "Authorization: Bearer $KER_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "model": "${id}",\n    "input": ["向量数据库是什么", "RAG 检索增强生成"]\n  }'`
+      : `from openai import OpenAI\n\nclient = OpenAI(api_key="KER_API_KEY", base_url="https://api.kerapi.com/v1")\n\nresp = client.embeddings.create(\n    model="${id}",\n    input=["向量数据库是什么", "RAG 检索增强生成"],\n)\nprint(resp.data[0].embedding[:8])`,
+  },
+  rerank: {
+    label: '重排序', build: (id, lang) => lang === 'curl'
+      ? `curl https://api.kerapi.com/v1/rerank \\\n  -H "Authorization: Bearer $KER_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "model": "${id}",\n    "query": "什么是聚合 API 平台",\n    "documents": [\n      "聚合 API 平台统一接入多家大模型。",\n      "今天的午饭推荐是麻辣烫。"\n    ]\n  }'`
+      : `import requests\n\nresp = requests.post(\n    "https://api.kerapi.com/v1/rerank",\n    headers={"Authorization": "Bearer KER_API_KEY"},\n    json={\n        "model": "${id}",\n        "query": "什么是聚合 API 平台",\n        "documents": ["聚合 API 平台统一接入多家大模型。", "今天的午饭推荐是麻辣烫。"],\n    },\n)\nfor r in resp.json()["results"]:\n    print(r["index"], r["relevance_score"])`,
+  },
+};
+
+let codeState = { api: null, lang: 'curl' };
+
+function renderCode() {
+  const m = currentModel;
+  const apis = Object.keys(m.apis).filter((k) => CODE[k]);
+  if (!apis.includes(codeState.api)) codeState.api = apis[0];
+  $('#codeApiTabs').innerHTML = apis.map((k) => `<button class="${codeState.api === k ? 'active' : ''}" data-api="${k}">${CODE[k].label}</button>`).join('');
+  $('#codeBlock').textContent = CODE[codeState.api].build(m.id, codeState.lang);
+}
+
+/* ===== 视图切换 / 复制 / 体验 ===== */
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.hidden = false;
+  clearTimeout(t._timer); t._timer = setTimeout(() => { t.hidden = true; }, 1600);
+}
+
+function copyText(text, msg) {
+  (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject())
+    .then(() => toast(msg)).catch(() => toast('复制失败，请手动选择复制'));
+}
+
+function drawerOpen() { return $('#detailView').classList.contains('open'); }
+
+function openDetail(id) {
+  currentModel = MODELS.find((m) => m.id === id);
+  if (!currentModel) return;
+  codeState = { api: null, lang: 'curl' };
+  $('#drawerTitle').textContent = currentModel.name;
+  $('#drawerSub').textContent = currentModel.id;
+  $('#detailBody').innerHTML = detailHTML(currentModel);
+  $('#detailView').classList.add('open');
+  $('#detailView').setAttribute('aria-hidden', 'false');
+  $('#detailMask').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  $('.drawer-body').scrollTop = 0;
+  renderCode();
+  bindDetailEvents();
+}
+
+function closeDetail() {
+  if (!drawerOpen() && !$('#detailMask').classList.contains('open')) return;
+  $('#detailView').classList.remove('open');
+  $('#detailView').setAttribute('aria-hidden', 'true');
+  $('#detailMask').classList.remove('open');
+  document.body.style.overflow = '';
+  currentModel = null;
+}
+
+function bindDetailEvents() {
+  $('#copyId').addEventListener('click', () => copyText(currentModel.id, '已复制模型 ID'));
+  $('#copyCode').addEventListener('click', () => copyText($('#codeBlock').textContent, '代码已复制到剪贴板'));
+  $('#codeApiTabs').addEventListener('click', (e) => { const b = e.target.closest('[data-api]'); if (!b) return; codeState.api = b.dataset.api; renderCode(); });
+  $('#codeLangTabs').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-lang]'); if (!b) return;
+    codeState.lang = b.dataset.lang;
+    document.querySelectorAll('#codeLangTabs button').forEach((x) => x.classList.toggle('active', x.dataset.lang === codeState.lang));
+    renderCode();
+  });
+}
+
+/* ===== 初始化 ===== */
+renderFilterBar();
+renderCards();
+bindListEvents();
+const qp = new URLSearchParams(location.search);
+const wantedId = qp.get('model') || decodeURIComponent(location.hash.replace(/^#model=/, ''));
+if (wantedId && MODELS.some((m) => m.id === wantedId)) openDetail(wantedId);
+
+
+
+
+</script>
+</body>
+</html>
